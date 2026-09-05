@@ -1,0 +1,25 @@
+Dados para coletar por lib
+
+pydriller
+    commits - ok
+    numero de autores ativos - ok
+
+poolingh
+    stars
+    forks
+    PRs abertos
+    PRs fechados
+    PRs aceitos
+    issues abertas
+    issues fechadas
+    utilização por outros repos (talvez)
+
+Número de downloads quer dizer alguma coisa?
+https://npm-stat.com
+    downloads
+
+É uma medida de popularidade?
+    CVEs
+
+pytrends-modern (parece funcionar)
+    google trends
