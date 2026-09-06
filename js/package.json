@@ -1,0 +1,23 @@
+{
+  "name": "masters-msr",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/frsouzaa/masters-msr#readme",
+  "bugs": {
+    "url": "https://github.com/frsouzaa/masters-msr/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frsouzaa/masters-msr.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node --env-file=.env index.js"
+  },
+  "dependencies": {
+    "poolingh": "^1.0.3"
+  }
+}
