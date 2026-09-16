@@ -1,15 +1,15 @@
 Dados para coletar por lib
 
-pydriller
-    commits - ok
+pydriller -> ok
+    commits -> ok
     numero de autores ativos
 
-poolingh (https://www.npmjs.com/package/poolingh)
-    stars (www.star-history.com)
-    forks
-    PRs abertos
-    PRs fechados
-    PRs aceitos
+poolingh (https://www.npmjs.com/package/poolingh) -> ok
+    stars (www.star-history.com) -> ok
+    forks -> ok (A API não retorna forks deletados)
+    PRs abertos -> ok
+    PRs fechados -> ok
+    PRs aceitos -> ok
     issues abertas
     issues fechadas
     utilização por outros repos (talvez)
