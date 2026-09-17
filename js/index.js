@@ -126,36 +126,36 @@ const queuePullsPerDay = (queue, page=1, cache=[]) => {
   queue.push(request);
 }
 
-const queueIssuesPerDay = (queue, page=1, cache=[]) => {
-  const request = new GitHubApiRequest(
-    `${GH_API_BASE_URL}/repos/${REPO_NAME}/issues?per_page=${ISSUES_API_PER_PAGE}&page=${page}&state=all`,
-    {},
-    (result) => {
-      console.log(`Issues - Página ${page} processada com sucesso, quantidade de issues encontrados na página: ${result.data.length}`);
-      cache.push(...result.data.filter(issue => issue.pull_request == null).map(issue => ({
-        html_url: issue.html_url,
-        created_at: issue.created_at,
-        closed_at: issue.closed_at,
-        merged_at: issue.merged_at,
-        count: 1,
-      })));
-      if (result.data.length < ISSUES_API_PER_PAGE) {
-        dumpVarIntoFile(cache, "issuesPerDay.json");
-        if (queue.getQueueLength() === 0) {
-          queue.stop();
-        }
-        return;
-      }
-      queueIssuesPerDay(queue, page + 1, cache);
-    }
-  );
-  queue.push(request);
-}
+// Rest API não funciona para projetos com mais de 10000 issues, a alternativa é utilizar GraphQL
+// const queueIssuesPerDay = (queue, page=1, cache=[]) => {
+//   const request = new GitHubApiRequest(
+//     `${GH_API_BASE_URL}/repos/${REPO_NAME}/issues?per_page=${ISSUES_API_PER_PAGE}&page=${page}&state=all`,
+//     {},
+//     (result) => {
+//       console.log(`Issues - Página ${page} processada com sucesso, quantidade de issues encontrados na página: ${result.data.length}`);
+//       cache.push(...result.data.filter(issue => issue.pull_request == null).map(issue => ({
+//         html_url: issue.html_url,
+//         created_at: issue.created_at,
+//         closed_at: issue.closed_at,
+//         merged_at: issue.merged_at,
+//         count: 1,
+//       })));
+//       if (result.data.length < ISSUES_API_PER_PAGE) {
+//         dumpVarIntoFile(cache, "issuesPerDay.json");
+//         if (queue.getQueueLength() === 0) {
+//           queue.stop();
+//         }
+//         return;
+//       }
+//       queueIssuesPerDay(queue, page + 1, cache);
+//     }
+//   );
+//   queue.push(request);
+// }
 
 let queue = new GitHubApiQueue([getApiClient()]);
 
-// queueStarsPerDay(queue);
-// queueForksPerDay(queue);
-// queuePullsPerDay(queue);
-queueIssuesPerDay(queue);
+queueStarsPerDay(queue);
+queueForksPerDay(queue);
+queuePullsPerDay(queue);
 queue.start();

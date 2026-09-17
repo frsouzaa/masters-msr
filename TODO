@@ -10,8 +10,8 @@ poolingh (https://www.npmjs.com/package/poolingh) -> ok
     PRs abertos -> ok
     PRs fechados -> ok
     PRs aceitos -> ok
-    issues abertas
-    issues fechadas
+    issues abertas -> ok (rest API não suporta, tive que usar GraphQL)
+    issues fechadas -> ok (rest API não suporta, tive que usar GraphQL)
     utilização por outros repos (talvez)
 
 Número de downloads quer dizer alguma coisa?

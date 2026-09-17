@@ -2,7 +2,7 @@ from pytrends_modern import TrendReq
 
 pytrends = TrendReq(hl='pt-BR', tz=360)
 pytrends.build_payload(
-    kw_list=['Pandas'],
+    kw_list=['react'],
     timeframe='today 5-y',
     geo='',
     cat=1227,

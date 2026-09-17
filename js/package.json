@@ -18,6 +18,7 @@
     "start": "node --env-file=.env index.js"
   },
   "dependencies": {
+    "graphql-request": "^7.4.0",
     "poolingh": "^1.0.3"
   }
 }
