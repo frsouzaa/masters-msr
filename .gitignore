@@ -371,3 +371,4 @@ vite.config.ts.timestamp-*
 outputs/
 *.csv
 *.png
+*.svg

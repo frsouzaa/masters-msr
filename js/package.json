@@ -15,9 +15,11 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node --env-file=.env index.js"
+    "index": "node --env-file=.env index.js",
+    "graphql": "node --env-file=.env graphql.js"
   },
   "dependencies": {
+    "@mrodrig/json-2-csv-cli": "^5.5.9",
     "graphql-request": "^7.4.0",
     "poolingh": "^1.0.3"
   }

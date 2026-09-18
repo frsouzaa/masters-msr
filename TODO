@@ -1,25 +1,34 @@
-Dados para coletar por lib
+Dados para coletar
 
 pydriller -> ok
-    commits -> ok
-    numero de autores ativos
+    Commits -> ok
+    Número de autores ativos
 
-poolingh (https://www.npmjs.com/package/poolingh) -> ok
-    stars (www.star-history.com) -> ok
+(www.star-history.com)
+poolingh -> ok
+    stars -> ok
     forks -> ok (A API não retorna forks deletados)
     PRs abertos -> ok
     PRs fechados -> ok
     PRs aceitos -> ok
-    issues abertas -> ok (rest API não suporta, tive que usar GraphQL)
-    issues fechadas -> ok (rest API não suporta, tive que usar GraphQL)
-    utilização por outros repos (talvez)
+    Número de autores que abrem PRs
+    Issues abertas -> ok (rest API não suporta, tive que usar GraphQL)
+    Issues fechadas -> ok (rest API não suporta, tive que usar GraphQL)
+    Número de autores que abrem Issues
+    
+Utilização por outros repos
+    NPM
 
-Número de downloads quer dizer alguma coisa?
-https://npm-stat.com
-    downloads
+Número de downloads
+    NPM -> https://npm-stat.com
 
-É uma medida de popularidade?
-    CVEs
+pytrends-modern
+    google trends -> ok (olhar para keywords ou para topics?)
 
-pytrends-modern (parece funcionar)
-    google trends
+Short Paper:
+Moving Avarage (EMA) sobre todo o histórico do projeto: analisar todos os parâmetros coletados em intervalos exponenciais limitado à idade do projeto e classificar de acordo com a escala de Lifecicle:
+    - Strong Uptrend
+    - Uptrend
+    - Stable
+    - Downtrend
+    - Strong Downtrend 

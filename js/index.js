@@ -1,9 +1,10 @@
 import { GitHubApiRequest, GitHubApiClient, GitHubApiQueue } from "poolingh";
+import { json2csv } from 'json-2-csv';
 import fs from "fs";
 
 const GH_API_BASE_URL = "https://api.github.com";
 const GH_TOKEN = process.env.GH_TOKEN;
-const REPO_NAME = "react/react";
+const REPO_NAME = "ishepard/pydriller";
 const STARS_API_PER_PAGE = 30; // https://docs.github.com/en/rest/activity/starring?apiVersion=2026-03-10#get-repository-star-history
 const FORKS_API_PER_PAGE = 100; // https://docs.github.com/en/rest/repos/forks?apiVersion=2026-03-10#list-forks
 const PULLS_API_PER_PAGE = 100; // https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#list-pull-requests
@@ -23,7 +24,10 @@ const getWeeksBetween = (date1, date2) => {
 }
 
 const dumpVarIntoFile = (date, fileName) => {
-  fs.writeFile(`outputs/${fileName}`, JSON.stringify(date, null, 2), (err) => {
+    fs.writeFile(`outputs/${fileName}.csv`, json2csv(date), (err) => {
+      if (err) throw err;
+  });
+  fs.writeFile(`outputs/${fileName}.json`, JSON.stringify(date, null, 2), (err) => {
       if (err) throw err;
   });
 }
@@ -45,14 +49,14 @@ const queueStarsPerDay = (queue) => {
             for (let j = 0; j < result.data.length; j++) {
               for (let k = 0; k < result.data[j].days.length; k++) {
                 starsPerDay.push({
-                  date: new Date((result.data[j].week + k * 24 * 60 * 60) * 1000), // convertendo para timestamp
+                  date: new Date((result.data[j].week + k * 24 * 60 * 60) * 1000).toISOString().split('T')[0], // convertendo para timestamp
                   count: result.data[j].days[k],
                 });
               }
             }
             if (i === 1) {
               console.log("Stars - Todas as páginas foram processadas com sucesso!");
-              dumpVarIntoFile(starsPerDay, "starsPerDay.json");
+              dumpVarIntoFile(starsPerDay, "starsPerDay");
               if (queue.getQueueLength() === 0) {
                 queue.stop();
               }
@@ -81,12 +85,13 @@ const queueForksPerDay = (queue) => {
           (result) => {
             console.log(`Forks - Página ${i} processada com sucesso, quantidade de forks encontrados na página: ${result.data.length}`);
             forksPerDay.push(...result.data.map(fork => ({
-              date: fork.created_at,
+              html_url: fork.html_url,
+              date: fork.created_at.split('T')[0],
               count: 1,
             })));
             if (i === 1) {
               console.log("Forks - Todas as páginas foram processadas com sucesso!");
-              dumpVarIntoFile(forksPerDay, "forksPerDay.json");
+              dumpVarIntoFile(forksPerDay, "forksPerDay");
               if (queue.getQueueLength() === 0) {
                 queue.stop();
               }
@@ -108,13 +113,13 @@ const queuePullsPerDay = (queue, page=1, cache=[]) => {
       console.log(`Pulls - Página ${page} processada com sucesso, quantidade de pull requests encontrados na página: ${result.data.length}`);
       cache.push(...result.data.map(pull => ({
         html_url: pull.html_url,
-        created_at: pull.created_at,
-        closed_at: pull.closed_at,
-        merged_at: pull.merged_at,
+        created_at: pull.created_at.split('T')[0],
+        closed_at: pull.closed_at ? pull.closed_at.split('T')[0] : null,
+        merged_at: pull.merged_at ? pull.merged_at.split('T')[0] : null,
         count: 1,
       })));
       if (result.data.length < PULLS_API_PER_PAGE) {
-        dumpVarIntoFile(cache, "pullsPerDay.json");
+        dumpVarIntoFile(cache, "pullsPerDay");
         if (queue.getQueueLength() === 0) {
           queue.stop();
         }
@@ -135,13 +140,13 @@ const queuePullsPerDay = (queue, page=1, cache=[]) => {
 //       console.log(`Issues - Página ${page} processada com sucesso, quantidade de issues encontrados na página: ${result.data.length}`);
 //       cache.push(...result.data.filter(issue => issue.pull_request == null).map(issue => ({
 //         html_url: issue.html_url,
-//         created_at: issue.created_at,
-//         closed_at: issue.closed_at,
-//         merged_at: issue.merged_at,
+//         created_at: issue.created_at.split('T')[0],
+//         closed_at: issue.closed_at ? issue.closed_at.split('T')[0] : null,
+//         merged_at: issue.merged_at ? issue.merged_at.split('T')[0] : null,
 //         count: 1,
 //       })));
 //       if (result.data.length < ISSUES_API_PER_PAGE) {
-//         dumpVarIntoFile(cache, "issuesPerDay.json");
+//         dumpVarIntoFile(cache, "issuesPerDay");
 //         if (queue.getQueueLength() === 0) {
 //           queue.stop();
 //         }
