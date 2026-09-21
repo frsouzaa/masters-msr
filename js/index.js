@@ -4,7 +4,7 @@ import fs from "fs";
 
 const GH_API_BASE_URL = "https://api.github.com";
 const GH_TOKEN = process.env.GH_TOKEN;
-const REPO_NAME = "ishepard/pydriller";
+const REPO_OWNER_NAME = process.env.REPO_URL.split("github.com/")[1];
 const STARS_API_PER_PAGE = 30; // https://docs.github.com/en/rest/activity/starring?apiVersion=2026-03-10#get-repository-star-history
 const FORKS_API_PER_PAGE = 100; // https://docs.github.com/en/rest/repos/forks?apiVersion=2026-03-10#list-forks
 const PULLS_API_PER_PAGE = 100; // https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#list-pull-requests
@@ -35,14 +35,14 @@ const dumpVarIntoFile = (date, fileName) => {
 const queueStarsPerDay = (queue) => {
   const starsPerDay = [];
   const request = new GitHubApiRequest(
-    `${GH_API_BASE_URL}/repos/${REPO_NAME}`,
+    `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}`,
     {},
     (result) => {
-      console.log(`Stars - Repositório ${REPO_NAME} encontrado com sucesso, data de criação: ${result.data.created_at}`);
+      console.log(`Stars - Repositório ${REPO_OWNER_NAME} encontrado com sucesso, data de criação: ${result.data.created_at}`);
       const number_of_pages = Math.ceil(getWeeksBetween(new Date(result.data.created_at), new Date()) / STARS_API_PER_PAGE);
       for (let i = 1; i <= number_of_pages; i++) {
         const request = new GitHubApiRequest(
-          `${GH_API_BASE_URL}/repos/${REPO_NAME}/stargazers/history?per_page=${STARS_API_PER_PAGE}&page=${i}`,
+          `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/stargazers/history?per_page=${STARS_API_PER_PAGE}&page=${i}`,
           {},
           (result) => {
             console.log(`Stars - Página ${i} processada com sucesso!`);
@@ -73,14 +73,14 @@ const queueStarsPerDay = (queue) => {
 const queueForksPerDay = (queue) => {
   const forksPerDay = [];
   const request = new GitHubApiRequest(
-    `${GH_API_BASE_URL}/repos/${REPO_NAME}`,
+    `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}`,
     {},
     (result) => {
-      console.log(`Forks - Repositório ${REPO_NAME} encontrado com sucesso, quantidade de forks: ${result.data.forks_count}`);
+      console.log(`Forks - Repositório ${REPO_OWNER_NAME} encontrado com sucesso, quantidade de forks: ${result.data.forks_count}`);
       const number_of_pages = Math.ceil(result.data.forks_count / FORKS_API_PER_PAGE);
       for (let i = 1; i <= number_of_pages; i++) {
         const request = new GitHubApiRequest(
-          `${GH_API_BASE_URL}/repos/${REPO_NAME}/forks?per_page=${FORKS_API_PER_PAGE}&page=${i}&sort=newest`,
+          `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/forks?per_page=${FORKS_API_PER_PAGE}&page=${i}&sort=newest`,
           {},
           (result) => {
             console.log(`Forks - Página ${i} processada com sucesso, quantidade de forks encontrados na página: ${result.data.length}`);
@@ -107,7 +107,7 @@ const queueForksPerDay = (queue) => {
 
 const queuePullsPerDay = (queue, page=1, cache=[]) => {
   const request = new GitHubApiRequest(
-    `${GH_API_BASE_URL}/repos/${REPO_NAME}/pulls?per_page=${PULLS_API_PER_PAGE}&page=${page}&state=all`,
+    `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/pulls?per_page=${PULLS_API_PER_PAGE}&page=${page}&state=all`,
     {},
     (result) => {
       console.log(`Pulls - Página ${page} processada com sucesso, quantidade de pull requests encontrados na página: ${result.data.length}`);
@@ -134,7 +134,7 @@ const queuePullsPerDay = (queue, page=1, cache=[]) => {
 // Rest API não funciona para projetos com mais de 10000 issues, a alternativa é utilizar GraphQL
 // const queueIssuesPerDay = (queue, page=1, cache=[]) => {
 //   const request = new GitHubApiRequest(
-//     `${GH_API_BASE_URL}/repos/${REPO_NAME}/issues?per_page=${ISSUES_API_PER_PAGE}&page=${page}&state=all`,
+//     `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/issues?per_page=${ISSUES_API_PER_PAGE}&page=${page}&state=all`,
 //     {},
 //     (result) => {
 //       console.log(`Issues - Página ${page} processada com sucesso, quantidade de issues encontrados na página: ${result.data.length}`);

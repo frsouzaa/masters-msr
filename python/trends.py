@@ -1,14 +1,20 @@
 from pytrends_modern import TrendReq
 
-pytrends = TrendReq(hl='pt-BR', tz=360)
-suggs = pytrends.suggestions("pydriller")
-print(suggs)
 
-pytrends.build_payload(
-    kw_list=['/g/11tj6xz8v1'],
-    timeframe='all'
-)
+def get_trends(output_file, term):    
+    pytrends = TrendReq()
+    kw = term
+    for suggestion in pytrends.suggestions(term):
+        if suggestion["title"] == term:
+            kw = suggestion["mid"]
+            break
 
-interest_df = pytrends.interest_over_time()
+    pytrends.build_payload(
+        kw_list=[kw],
+        timeframe='all'
+    )
 
-interest_df.to_csv('outputs/interestFinal.csv')
+    df = pytrends.interest_over_time()
+    df = df[df.isPartial == False]
+    df.rename(columns={kw: "count"}, inplace=True)
+    df.to_csv(output_file)

@@ -3,21 +3,27 @@ import { json2csv } from 'json-2-csv';
 import fs from "fs";
 
 const GH_TOKEN = process.env.GH_TOKEN;
+const REPO_OWNER = process.env.REPO_URL.split("github.com/")[1].split("/")[0];
+const REPO_NAME = process.env.REPO_URL.split("github.com/")[1].split("/")[1];
 
-function sleep(ms) {
+
+const sleep = (ms) => {
     return new Promise(resolve => ms);
 }
 
-const client = new GraphQLClient('https://api.github.com/graphql', {
-  headers: {
-    Authorization: `Bearer ${GH_TOKEN}`,
-  },
-})
+const dumpVarIntoFile = (date, fileName) => {
+    fs.writeFile(`outputs/${fileName}.csv`, json2csv(date), (err) => {
+      if (err) throw err;
+  });
+  fs.writeFile(`outputs/${fileName}.json`, JSON.stringify(date, null, 2), (err) => {
+      if (err) throw err;
+  });
+}
 
 const getQuery = (after) => {
   const afterString = after ? `, after: "${after}"` : ''
   return `{
-    repository(owner: "ishepard", name: "pydriller") { 
+    repository(owner: "${REPO_OWNER}", name: "${REPO_NAME}") { 
       issues(first: 100 ${afterString}) {
         nodes {
           url
@@ -35,14 +41,11 @@ const getQuery = (after) => {
   }`
 }
 
-const dumpVarIntoFile = (date, fileName) => {
-    fs.writeFile(`outputs/${fileName}.csv`, json2csv(date), (err) => {
-      if (err) throw err;
-  });
-  fs.writeFile(`outputs/${fileName}.json`, JSON.stringify(date, null, 2), (err) => {
-      if (err) throw err;
-  });
-}
+const client = new GraphQLClient('https://api.github.com/graphql', {
+  headers: {
+    Authorization: `Bearer ${GH_TOKEN}`,
+  },
+})
 
 const fetchAllIssues = (page, after=null, cache=[]) => {
   console.log(`Fetching issues page ${page}, after: ${after}`)
