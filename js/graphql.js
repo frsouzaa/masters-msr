@@ -15,9 +15,6 @@ const dumpVarIntoFile = (date, fileName) => {
     fs.writeFile(`outputs/${fileName}.csv`, json2csv(date), (err) => {
       if (err) throw err;
   });
-  fs.writeFile(`outputs/${fileName}.json`, JSON.stringify(date, null, 2), (err) => {
-      if (err) throw err;
-  });
 }
 
 const getQuery = (after) => {
