@@ -2,10 +2,13 @@ from datetime import datetime
 import pandas as pd
 
 
-def parse_file(input_file, output_file, date_column, period):
+def parse_file(input_file, output_file, date_column, main_column, period, mode):
     df = pd.read_csv(input_file)
 
-    df = df.groupby(date_column)["count"].sum().reset_index()
+    if mode == "SUM":
+        df = df.groupby(date_column)[main_column].sum().reset_index()
+    if mode == "AGG":
+        df = df.groupby(date_column).agg({main_column: "nunique"}).reset_index()
 
     if period == "DAILY":
         pattern = "%Y-%m-%d"
@@ -13,7 +16,7 @@ def parse_file(input_file, output_file, date_column, period):
     if period == "MONTHLY":
         pattern = "%Y-%m"
         offset = pd.DateOffset(months=1)
-        df = df.groupby(df[date_column].str[:7])["count"].sum().reset_index()
+        df = df.groupby(df[date_column].str[:7])[main_column].sum().reset_index()
 
     minDate = datetime.strptime(df[date_column].agg("min"), pattern)
     maxDate = datetime.strptime(df[date_column].agg("max"), pattern)
@@ -27,13 +30,13 @@ def parse_file(input_file, output_file, date_column, period):
                     df,
                     pd.DataFrame(
                         [[minDate.strftime(pattern), 0, summation]],
-                        columns=[date_column, "count", "summation"],
+                        columns=[date_column, main_column, "summation"],
                     ),
                 ]
             )
         else:
             summation += df.loc[
-                df[date_column] == minDate.strftime(pattern), "count"
+                df[date_column] == minDate.strftime(pattern), main_column
             ].values[0]
             df.loc[df[date_column] == minDate.strftime(pattern), "summation"] = (
                 summation
