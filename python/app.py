@@ -6,7 +6,7 @@ from ewma import ewma
 from plot import plot
 
 config = dotenv.dotenv_values()
-OUTPUT_DIR = "outputs/junit4"
+OUTPUT_DIR = "outputs"
 PERIOD = "MONTHLY" # DAILY | MONTHLY
 FEATURES = [
     {"key": "commits"},
@@ -47,8 +47,8 @@ FEATURES = [
 ]
 REPO_NAME = config.get("REPO_URL").strip("/").split("/")[-1]
 
-# get_commits(f"{OUTPUT_DIR}/commitsPerDay.csv", config.get("REPO_URL"))
-# get_trends(f"{OUTPUT_DIR}/interestPerDay.csv", REPO_NAME)
+get_commits(f"{OUTPUT_DIR}/commitsPerDay.csv", config.get("REPO_URL"))
+get_trends(f"{OUTPUT_DIR}/interestPerDay.csv", REPO_NAME)
 
 for feature in FEATURES:
     key = feature["key"]
@@ -70,4 +70,4 @@ for feature in FEATURES:
         mode
     )
     ewma(final, ewmas, main)
-    plot(ewmas, svg, date, main, key, REPO_NAME)
+    plot(ewmas, svg, date, main, key.replace("_", " ").title(), REPO_NAME)

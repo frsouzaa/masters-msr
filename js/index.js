@@ -109,6 +109,8 @@ const queuePullsPerDay = (queue, page=1, cache=[]) => {
     (result) => {
       console.log(`Pulls - Página ${page} processada com sucesso, quantidade de pull requests encontrados na página: ${result.data.length}`);
       cache.push(...result.data.map(pull => ({
+        repo_id: pull.base.repo.id,
+        number: pull.number,
         html_url: pull.html_url,
         created_at: pull.created_at.split('T')[0],
         closed_at: pull.closed_at ? pull.closed_at.split('T')[0] : null,

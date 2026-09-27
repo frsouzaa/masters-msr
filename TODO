@@ -12,10 +12,13 @@ poolingh -> ok
     PRs fechados -> ok
     PRs aceitos -> ok
     Número de autores que abrem PRs
+    Número de autores que fecham PRs
+    Número de autores que fazem merge de PRs
     Issues abertas -> ok (rest API não suporta, tive que usar GraphQL)
     Issues fechadas -> ok (rest API não suporta, tive que usar GraphQL)
     Número de autores que abrem Issues
-    
+    Número de autores que fecham Issues
+
 Utilização por outros repos
     NPM
 

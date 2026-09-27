@@ -26,6 +26,7 @@ const getQuery = (after) => {
           url
           createdAt
           closedAt
+          number
         }
         pageInfo {
           endCursor
@@ -53,6 +54,7 @@ const fetchAllIssues = (page, after=null, cache=[]) => {
     const pageInfo = data.repository.issues.pageInfo
     after = pageInfo.endCursor
     cache.push(...issues.map(issue => ({
+      number: issue.number,
       html_url: issue.url,
       created_at: issue.createdAt.split('T')[0],
       closed_at: issue.closedAt ? issue.closedAt.split('T')[0] : null,

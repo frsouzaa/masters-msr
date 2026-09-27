@@ -6,22 +6,40 @@ LINE_WIDTH = 1
 
 def plot(input_file, output_file, date_column, main_column, feature, name, concat_file=None, concat_name=None):
     df = pd.read_csv(input_file).set_index(date_column)
+    df.rename(
+        columns={
+            main_column: f"{name}_{main_column}",
+            "ema6": f"{name}_ema6",
+            "ema12": f"{name}_ema12",
+            "ema24": f"{name}_ema24",
+            "ema48": f"{name}_ema48",
+            "summation": f"{name}_summation",
+        },
+        inplace=True,
+    )
 
     if concat_file:
+        df1 = df
         df2 = pd.read_csv(concat_file).set_index(date_column)
         df2.rename(
             columns={
-                main_column: f"{main_column}_2",
-                "ema6": "ema6_2",
-                "ema12": "ema12_2",
-                "ema24": "ema24_2",
-                "ema48": "ema48_2",
-                "summation": "summation_2",
+                main_column: f"{concat_name}_{main_column}",
+                "ema6": f"{concat_name}_ema6",
+                "ema12": f"{concat_name}_ema12",
+                "ema24": f"{concat_name}_ema24",
+                "ema48": f"{concat_name}_ema48",
+                "summation": f"{concat_name}_summation",
             },
             inplace=True,
         )
+        concat = [df1, df2]
+        min1 = min(df1.index.values)
+        min2 = min(df2  .index.values)
+        if min2 < min1:
+            concat = concat[::-1]
+            name, concat_name = concat_name, name
         df = pd.concat(
-            [df, df2],
+            concat,
             axis=1,
         )
         df.sort_index(inplace=True)
@@ -31,17 +49,17 @@ def plot(input_file, output_file, date_column, main_column, feature, name, conca
     # )
     fig, ax = plt.subplots()
     
-    ax.plot(df.index, df[main_column], label=f"{name}: # {feature}", linewidth=LINE_WIDTH, linestyle="--")
-    # ax.plot(df.index, df["ema6"], label=f"{name}: EMA-6", linewidth=LINE_WIDTH)
-    ax.plot(df.index, df["ema12"], label=f"{name}: EMA-12", linewidth=LINE_WIDTH)
-    ax.plot(df.index, df["ema24"], label=f"{name}: EMA-24", linewidth=LINE_WIDTH)
-    # ax.plot(df.index, df["ema48"], label=f"{name}: EMA-48", linewidth=LINE_WIDTH)
+    ax.plot(df.index, df[f"{name}_{main_column}"], label=f"{name}: # {feature}", linewidth=LINE_WIDTH, linestyle="--")
+    # ax.plot(df.index, df[f"{name}_ema6"], label=f"{name}: EMA-6", linewidth=LINE_WIDTH)
+    ax.plot(df.index, df[f"{name}_ema12"], label=f"{name}: EMA-12", linewidth=LINE_WIDTH)
+    ax.plot(df.index, df[f"{name}_ema24"], label=f"{name}: EMA-24", linewidth=LINE_WIDTH)
+    # ax.plot(df.index, df[f"{name}_ema48"], label=f"{name}: EMA-48", linewidth=LINE_WIDTH)
     if concat_file:
-        ax.plot(df.index, df[f"{main_column}_2"], label=f"{concat_name}: # {feature}", linewidth=LINE_WIDTH, linestyle="--")
-        # ax.plot(df.index, df["ema6_2"], label=f"{concat_name}: EMA-6", linewidth=LINE_WIDTH)
-        ax.plot(df.index, df["ema12_2"], label=f"{concat_name}: EMA-12", linewidth=LINE_WIDTH)
-        ax.plot(df.index, df["ema24_2"], label=f"{concat_name}: EMA-24", linewidth=LINE_WIDTH)
-        # ax.plot(df.index, df["ema48_2"], label=f"{concat_name}: EMA-48", linewidth=LINE_WIDTH)
+        ax.plot(df.index, df[f"{concat_name}_{main_column}"], label=f"{concat_name}: # {feature}", linewidth=LINE_WIDTH, linestyle="--")
+        # ax.plot(df.index, df[f"{concat_name}_ema6"], label=f"{concat_name}: EMA-6", linewidth=LINE_WIDTH)
+        ax.plot(df.index, df[f"{concat_name}_ema12"], label=f"{concat_name}: EMA-12", linewidth=LINE_WIDTH)
+        ax.plot(df.index, df[f"{concat_name}_ema24"], label=f"{concat_name}: EMA-24", linewidth=LINE_WIDTH)
+        # ax.plot(df.index, df[f"{concat_name}_ema48"], label=f"{concat_name}: EMA-48", linewidth=LINE_WIDTH)
     pace = len(df.index.values) / 22
     ax.set_xticks(df.index.values[0 :: int(pace)])
     ax.legend()
@@ -54,13 +72,13 @@ def plot(input_file, output_file, date_column, main_column, feature, name, conca
 
 
 if __name__ == "__main__":
-    OUTPUT_DIR = "outputs"
-    FEATURE = "authors"
+    FEATURE = "stars"
     DATE_COLUMN = "date"
-    MAIN_COLUMN = "author_name"
+    MAIN_COLUMN = "count"
     NAME = "junit-framework"
     CONCAT_NAME = "junit4"
-    INPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}EMA.csv"
-    OUTPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}.svg"
+    OUTPUT_DIR = "outputs"
+    INPUT_FILE = f"{OUTPUT_DIR}/junit-framework/{FEATURE}EMA.csv"
+    OUTPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}-{NAME}-X-{CONCAT_NAME}.png"
     CONCAT_FILE = f"{OUTPUT_DIR}/junit4/{FEATURE}EMA.csv"
     plot(INPUT_FILE, OUTPUT_FILE, DATE_COLUMN, MAIN_COLUMN, FEATURE.replace("_", " ").title(), NAME, CONCAT_FILE, CONCAT_NAME)

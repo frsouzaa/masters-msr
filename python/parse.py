@@ -19,11 +19,14 @@ def parse_file(input_file, output_file, date_column, main_column, period, mode):
         df = df.groupby(df[date_column].str[:7])[main_column].sum().reset_index()
 
     minDate = datetime.strptime(df[date_column].agg("min"), pattern)
-    maxDate = datetime.strptime(df[date_column].agg("max"), pattern)
+    # maxDate = datetime.strptime(df[date_column].agg("max"), pattern)
+    today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
     df["summation"] = None
     summation = 0
 
-    while minDate <= maxDate:
+    while (
+        minDate <= today
+    ):  # the limit is today because if a project data ends one year ago (for exemple) it can mess up with the EMA analysis, so we complete the data with zero values
         if not df[df[date_column] == minDate.strftime(pattern)].any().any():
             df = pd.concat(
                 [
@@ -46,3 +49,15 @@ def parse_file(input_file, output_file, date_column, main_column, period, mode):
     df.sort_values(by=date_column).reset_index(drop=True).to_csv(
         output_file, index=False
     )
+
+
+if __name__ == "__main__":
+    FEATURE = "issues"
+    DATE_COLUMN = "created_at"
+    MAIN_COLUMN = "count"
+    PERIOD = "MONTHLY"
+    MODE = "SUM"
+    OUTPUT_DIR = "outputs"
+    INPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}PerDay.csv"
+    OUTPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}Final.csv"
+    parse_file(INPUT_FILE, OUTPUT_FILE, DATE_COLUMN, MAIN_COLUMN, PERIOD, MODE)
