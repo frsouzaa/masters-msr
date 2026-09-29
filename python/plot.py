@@ -72,13 +72,17 @@ def plot(input_file, output_file, date_column, main_column, feature, name, conca
 
 
 if __name__ == "__main__":
-    FEATURE = "stars"
-    DATE_COLUMN = "date"
+    FEATURE = "pulls"
+    DATE_COLUMN = "created_at"
     MAIN_COLUMN = "count"
-    NAME = "junit-framework"
-    CONCAT_NAME = "junit4"
+    NAME = "csv"
     OUTPUT_DIR = "outputs"
-    INPUT_FILE = f"{OUTPUT_DIR}/junit-framework/{FEATURE}EMA.csv"
-    OUTPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}-{NAME}-X-{CONCAT_NAME}.png"
-    CONCAT_FILE = f"{OUTPUT_DIR}/junit4/{FEATURE}EMA.csv"
-    plot(INPUT_FILE, OUTPUT_FILE, DATE_COLUMN, MAIN_COLUMN, FEATURE.replace("_", " ").title(), NAME, CONCAT_FILE, CONCAT_NAME)
+    INPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}EMA.csv"
+    OUTPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}-{NAME}.png"
+    
+    # CONCAT_NAME = "junit4"
+    # CONCAT_FILE = f"{OUTPUT_DIR}/junit4/{FEATURE}EMA.csv"
+    # OUTPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}-{NAME}-X-{CONCAT_NAME}.png"
+    # plot(INPUT_FILE, OUTPUT_FILE, DATE_COLUMN, MAIN_COLUMN, FEATURE.replace("_", " ").title(), NAME, CONCAT_FILE, CONCAT_NAME)
+
+    plot(INPUT_FILE, OUTPUT_FILE, DATE_COLUMN, MAIN_COLUMN, FEATURE.replace("_", " ").title(), NAME)

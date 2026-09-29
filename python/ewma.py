@@ -10,3 +10,11 @@ def ewma(input_file, output_file, main_column):
     df["ema48"] = df[main_column].ewm(span=48).mean()
 
     df.to_csv(output_file, index=False)
+
+
+if __name__ == "__main__":
+    FEATURE = "pulls"
+    INPUT_FILE = f"outputs/{FEATURE}Final.csv"
+    OUTPUT_FILE = f"outputs/{FEATURE}EMA.csv"
+    MAIN_COLUMN = "count"
+    ewma(INPUT_FILE, OUTPUT_FILE, MAIN_COLUMN)

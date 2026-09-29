@@ -52,7 +52,7 @@ def parse_file(input_file, output_file, date_column, main_column, period, mode):
 
 
 if __name__ == "__main__":
-    FEATURE = "issues"
+    FEATURE = "pulls"
     DATE_COLUMN = "created_at"
     MAIN_COLUMN = "count"
     PERIOD = "MONTHLY"

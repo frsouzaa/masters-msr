@@ -7,14 +7,14 @@ from plot import plot
 
 config = dotenv.dotenv_values()
 OUTPUT_DIR = "outputs"
-PERIOD = "MONTHLY" # DAILY | MONTHLY
+PERIOD = "MONTHLY"  # DAILY | MONTHLY
 FEATURES = [
     {"key": "commits"},
     {
-        "key": "authors",
+        "key": "commited_by",
         "perDayFile": f"{OUTPUT_DIR}/commitsPerDay.csv",
         "main": "author_name",
-        "mode": "AGG"
+        "mode": "AGG",
     },
     {"key": "forks"},
     {
@@ -26,6 +26,20 @@ FEATURES = [
         "key": "closed_issues",
         "perDayFile": f"{OUTPUT_DIR}/issuesPerDay.csv",
         "date": "closed_at",
+    },
+    {
+        "key": "issues_created_by",
+        "perDayFile": f"{OUTPUT_DIR}/issuesPerDay.csv",
+        "date": "created_at",
+        "main": "created_by",
+        "mode": "AGG",
+    },
+    {
+        "key": "issues_closed_by",
+        "perDayFile": f"{OUTPUT_DIR}/issuesPerDay.csv",
+        "date": "closed_at",
+        "main": "closed_by",
+        "mode": "AGG",
     },
     {
         "key": "created_pulls",
@@ -41,6 +55,27 @@ FEATURES = [
         "key": "merged_pulls",
         "perDayFile": f"{OUTPUT_DIR}/pullsPerDay.csv",
         "date": "merged_at",
+    },
+    {
+        "key": "pulls_created_by",
+        "perDayFile": f"{OUTPUT_DIR}/pullsPerDay.csv",
+        "date": "created_at",
+        "main": "created_by",
+        "mode": "AGG",
+    },
+    {
+        "key": "pulls_closed_by",
+        "perDayFile": f"{OUTPUT_DIR}/pullsPerDay.csv",
+        "date": "closed_at",
+        "main": "closed_by",
+        "mode": "AGG",
+    },
+    {
+        "key": "pulls_merged_by",
+        "perDayFile": f"{OUTPUT_DIR}/pullsPerDay.csv",
+        "date": "merged_at",
+        "main": "merged_by",
+        "mode": "AGG",
     },
     {"key": "stars"},
     {"key": "interest"},
@@ -61,13 +96,6 @@ for feature in FEATURES:
     ewmas = f"{OUTPUT_DIR}/{key}EMA.csv"
     svg = f"{OUTPUT_DIR}/{key}.svg"
 
-    parse_file(
-        per_day,
-        final,
-        date,
-        main,
-        PERIOD,
-        mode
-    )
+    parse_file(per_day, final, date, main, PERIOD, mode)
     ewma(final, ewmas, main)
     plot(ewmas, svg, date, main, key.replace("_", " ").title(), REPO_NAME)
