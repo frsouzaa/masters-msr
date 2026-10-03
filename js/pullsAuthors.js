@@ -63,7 +63,7 @@ const queuePullDetails = (pulls) => {
           console.log(`Pulls - PR ${pulls[i].number} encontrado com sucesso`);
           pulls[i].merged_by = result.data.merged_by ? result.data.merged_by.login : null
           if (queue.getQueueLength() === 0) {
-            dumpVarIntoFile(pulls, "pullsPerDayAuthors");
+            dumpVarIntoFile(pulls, "per_day_pulls");
             queue.stop();
           }
         }
@@ -78,7 +78,7 @@ const queuePullDetails = (pulls) => {
           console.log(`Pulls - PR ${pulls[i].number} encontrado com sucesso`);
           pulls[i].closed_by = result.data.closed_by ? result.data.closed_by.login : null
           if (queue.getQueueLength() === 0) {
-            dumpVarIntoFile(pulls, "pullsPerDayAuthors");
+            dumpVarIntoFile(pulls, "per_day_pulls");
             queue.stop();
           }
         }
@@ -88,7 +88,7 @@ const queuePullDetails = (pulls) => {
   }
 }
 
-const pulls = await parseCSVFile("outputs/pullsPerDay.csv");
+const pulls = await parseCSVFile("outputs/per_day_pulls.csv");
 
 queuePullDetails(pulls);
 

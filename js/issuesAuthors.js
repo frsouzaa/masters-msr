@@ -63,7 +63,7 @@ const queuePullDetails = (issues) => {
           console.log(`Issues - Issue ${issues[i].number} encontrado com sucesso`);
           issues[i].closed_by = result.data.closed_by ? result.data.closed_by.login : null
           if (queue.getQueueLength() === 0) {
-            dumpVarIntoFile(issues, "issuesPerDayAuthors");
+            dumpVarIntoFile(issues, "per_day_issues");
             queue.stop();
           }
         }
@@ -73,7 +73,7 @@ const queuePullDetails = (issues) => {
   }
 }
 
-const issues = await parseCSVFile("outputs/issuesPerDay.csv");
+const issues = await parseCSVFile("outputs/per_day_issues.csv");
 
 queuePullDetails(issues);
 

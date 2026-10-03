@@ -53,7 +53,7 @@ const queueStarsPerDay = (queue) => {
             }
             if (i === 1) {
               console.log("Stars - Todas as páginas foram processadas com sucesso!");
-              dumpVarIntoFile(starsPerDay, "starsPerDay");
+              dumpVarIntoFile(starsPerDay, "per_day_stars");
               if (queue.getQueueLength() === 0) {
                 queue.stop();
               }
@@ -88,7 +88,7 @@ const queueForksPerDay = (queue) => {
             })));
             if (i === 1) {
               console.log("Forks - Todas as páginas foram processadas com sucesso!");
-              dumpVarIntoFile(forksPerDay, "forksPerDay");
+              dumpVarIntoFile(forksPerDay, "per_day_forks");
               if (queue.getQueueLength() === 0) {
                 queue.stop();
               }
@@ -121,7 +121,7 @@ const queuePullsPerDay = (queue, page = 1, cache = []) => {
         count: 1,
       })));
       if (result.data.length < PULLS_API_PER_PAGE) {
-        dumpVarIntoFile(cache, "pullsPerDay");
+        dumpVarIntoFile(cache, "per_day_pulls");
         if (queue.getQueueLength() === 0) {
           queue.stop();
         }
@@ -148,7 +148,7 @@ const queuePullsPerDay = (queue, page = 1, cache = []) => {
 //         count: 1,
 //       })));
 //       if (result.data.length < ISSUES_API_PER_PAGE) {
-//         dumpVarIntoFile(cache, "issuesPerDay");
+//         dumpVarIntoFile(cache, "per_day_issues");
 //         if (queue.getQueueLength() === 0) {
 //           queue.stop();
 //         }

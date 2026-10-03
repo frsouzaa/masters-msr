@@ -2,7 +2,15 @@ from datetime import datetime
 import pandas as pd
 
 
-def parse_file(input_file, output_file, date_column, main_column, period, mode):
+def parse_file(
+    input_file,
+    output_file,
+    date_column,
+    main_column,
+    period,
+    mode,
+    only_full_months=False,
+):
     df = pd.read_csv(input_file)
 
     if mode == "SUM":
@@ -46,9 +54,16 @@ def parse_file(input_file, output_file, date_column, main_column, period, mode):
             )
         minDate = minDate + offset
 
-    df.sort_values(by=date_column).reset_index(drop=True).to_csv(
-        output_file, index=False
-    )
+    df.rename(columns={date_column: "date", main_column: "count"}, inplace=True)
+
+    df.sort_values(by="date", inplace=True)
+
+    if only_full_months and period == "MONTHLY":
+        df = df.head(-1)  # remove the last month because it is not complete
+
+    df.reset_index(drop=True, inplace=True)
+
+    df.to_csv(output_file, index=False)
 
 
 if __name__ == "__main__":
@@ -60,4 +75,12 @@ if __name__ == "__main__":
     OUTPUT_DIR = "outputs"
     INPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}PerDay.csv"
     OUTPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}Final.csv"
-    parse_file(INPUT_FILE, OUTPUT_FILE, DATE_COLUMN, MAIN_COLUMN, PERIOD, MODE)
+    parse_file(
+        INPUT_FILE,
+        OUTPUT_FILE,
+        DATE_COLUMN,
+        MAIN_COLUMN,
+        PERIOD,
+        MODE,
+        only_full_months=True,
+    )

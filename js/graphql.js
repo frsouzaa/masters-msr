@@ -103,7 +103,7 @@ const fetchAllIssues = (page, after = null, cache = []) => {
       if (pageInfo.hasNextPage) {
         setTimeout(() => { fetchAllIssues(page + 1, after, cache) }, 3000)
       } else {
-        dumpVarIntoFile(cache, "issuesPerDay");
+        dumpVarIntoFile(cache, "per_day_issues");
       }
     })
 }
@@ -130,10 +130,10 @@ const fetchAllPulls = (page, after = null, cache = []) => {
       if (pageInfo.hasNextPage) {
         setTimeout(() => { fetchAllPulls(page + 1, after, cache) }, 3000)
       } else {
-        dumpVarIntoFile(cache, "pullsPerDay");
+        dumpVarIntoFile(cache, "per_day_pulls");
       }
     })
 }
 
-// fetchAllIssues(1);
+fetchAllIssues(1);
 fetchAllPulls(1);

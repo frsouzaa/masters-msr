@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def ewma(input_file, output_file, main_column):
+def ewma(input_file, output_file, main_column="count"):
     df = pd.read_csv(input_file)
 
     df["ema6"] = df[main_column].ewm(span=6).mean()

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 LINE_WIDTH = 1
 
-def plot(input_file, output_file, date_column, main_column, feature, name, concat_file=None, concat_name=None):
+def plot(input_file, output_file, feature, name, concat_file=None, concat_name=None, date_column="date", main_column="count"):
     df = pd.read_csv(input_file).set_index(date_column)
     df.rename(
         columns={
@@ -83,6 +83,6 @@ if __name__ == "__main__":
     # CONCAT_NAME = "junit4"
     # CONCAT_FILE = f"{OUTPUT_DIR}/junit4/{FEATURE}EMA.csv"
     # OUTPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}-{NAME}-X-{CONCAT_NAME}.png"
-    # plot(INPUT_FILE, OUTPUT_FILE, DATE_COLUMN, MAIN_COLUMN, FEATURE.replace("_", " ").title(), NAME, CONCAT_FILE, CONCAT_NAME)
+    # plot(INPUT_FILE, OUTPUT_FILE, FEATURE.replace("_", " ").title(), NAME, CONCAT_FILE, CONCAT_NAME, DATE_COLUMN, MAIN_COLUMN)
 
-    plot(INPUT_FILE, OUTPUT_FILE, DATE_COLUMN, MAIN_COLUMN, FEATURE.replace("_", " ").title(), NAME)
+    plot(INPUT_FILE, OUTPUT_FILE, FEATURE.replace("_", " ").title(), NAME, date_column=DATE_COLUMN, main_column=MAIN_COLUMN)

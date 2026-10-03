@@ -2,36 +2,25 @@ Dados para coletar
 
 pydriller -> ok
     Commits -> ok
-    Número de autores ativos -> ok
+    Número de autores que fazem commits -> ok
 
 (www.star-history.com)
 poolingh -> ok
     stars -> ok
-    forks -> ok (A API não retorna forks deletados)
+    forks -> ok (a API não retorna forks deletados)
     PRs abertos -> ok
     PRs fechados -> ok
     PRs aceitos -> ok
-    Número de autores que abrem PRs
-    Número de autores que fecham PRs
-    Número de autores que fazem merge de PRs
+    Número de autores que abrem PRs -> ok
+    Número de autores que fecham PRs -> ok
+    Número de autores que fazem merge de PRs -> ok
     Issues abertas -> ok (rest API não suporta, tive que usar GraphQL)
     Issues fechadas -> ok (rest API não suporta, tive que usar GraphQL)
-    Número de autores que abrem Issues
-    Número de autores que fecham Issues
-
-Utilização por outros repos
-    NPM
-
-Número de downloads
-    NPM -> https://npm-stat.com
+    Número de autores que abrem Issues -> ok
+    Número de autores que fecham Issues -> ok
 
 pytrends-modern
     google trends -> ok (olhar para keywords ou para topics?)
 
-Short Paper:
-Moving Avarage (EMA) sobre todo o histórico do projeto: analisar todos os parâmetros coletados em intervalos exponenciais limitado à idade do projeto e classificar de acordo com a escala de Lifecicle:
-    - Strong Uptrend
-    - Uptrend
-    - Stable
-    - Downtrend
-    - Strong Downtrend 
+Utilização por outros repos
+    NPM

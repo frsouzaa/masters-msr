@@ -4,98 +4,120 @@ from trends import get_trends
 from parse import parse_file
 from ewma import ewma
 from plot import plot
+from merge import merge_features
 
 config = dotenv.dotenv_values()
+
 OUTPUT_DIR = "outputs"
 PERIOD = "MONTHLY"  # DAILY | MONTHLY
+
+PER_DAY_COMMITS_FILE = f"{OUTPUT_DIR}/per_day_commits.csv"
+PER_DAY_FORKS_FILE = f"{OUTPUT_DIR}/per_day_forks.csv"
+PER_DAY_ISSUES_FILE = f"{OUTPUT_DIR}/per_day_issues.csv"
+PER_DAY_PULLS_FILE = f"{OUTPUT_DIR}/per_day_pulls.csv"
+PER_DAY_STARS_FILE = f"{OUTPUT_DIR}/per_day_stars.csv"
+PER_DAY_INTEREST_FILE = f"{OUTPUT_DIR}/per_day_interest.csv"
+
 FEATURES = [
-    {"key": "commits"},
     {
-        "key": "commited_by",
-        "perDayFile": f"{OUTPUT_DIR}/commitsPerDay.csv",
+        "id": "commits",
+        "perDayFile": PER_DAY_COMMITS_FILE,
+    },
+    {
+        "id": "commited_by",
+        "perDayFile": PER_DAY_COMMITS_FILE,
         "main": "author_name",
         "mode": "AGG",
     },
-    {"key": "forks"},
     {
-        "key": "created_issues",
-        "perDayFile": f"{OUTPUT_DIR}/issuesPerDay.csv",
+        "id": "forks",
+        "perDayFile": PER_DAY_FORKS_FILE,
+    },
+    {
+        "id": "created_issues",
+        "perDayFile": PER_DAY_ISSUES_FILE,
         "date": "created_at",
     },
     {
-        "key": "closed_issues",
-        "perDayFile": f"{OUTPUT_DIR}/issuesPerDay.csv",
+        "id": "closed_issues",
+        "perDayFile": PER_DAY_ISSUES_FILE,
         "date": "closed_at",
     },
     {
-        "key": "issues_created_by",
-        "perDayFile": f"{OUTPUT_DIR}/issuesPerDay.csv",
+        "id": "issues_created_by",
+        "perDayFile": PER_DAY_ISSUES_FILE,
         "date": "created_at",
         "main": "created_by",
         "mode": "AGG",
     },
     {
-        "key": "issues_closed_by",
-        "perDayFile": f"{OUTPUT_DIR}/issuesPerDay.csv",
+        "id": "issues_closed_by",
+        "perDayFile": PER_DAY_ISSUES_FILE,
         "date": "closed_at",
         "main": "closed_by",
         "mode": "AGG",
     },
     {
-        "key": "created_pulls",
-        "perDayFile": f"{OUTPUT_DIR}/pullsPerDay.csv",
+        "id": "created_pulls",
+        "perDayFile": PER_DAY_PULLS_FILE,
         "date": "created_at",
     },
     {
-        "key": "closed_pulls",
-        "perDayFile": f"{OUTPUT_DIR}/pullsPerDay.csv",
+        "id": "closed_pulls",
+        "perDayFile": PER_DAY_PULLS_FILE,
         "date": "closed_at",
     },
     {
-        "key": "merged_pulls",
-        "perDayFile": f"{OUTPUT_DIR}/pullsPerDay.csv",
+        "id": "merged_pulls",
+        "perDayFile": PER_DAY_PULLS_FILE,
         "date": "merged_at",
     },
     {
-        "key": "pulls_created_by",
-        "perDayFile": f"{OUTPUT_DIR}/pullsPerDay.csv",
+        "id": "pulls_created_by",
+        "perDayFile": PER_DAY_PULLS_FILE,
         "date": "created_at",
         "main": "created_by",
         "mode": "AGG",
     },
     {
-        "key": "pulls_closed_by",
-        "perDayFile": f"{OUTPUT_DIR}/pullsPerDay.csv",
+        "id": "pulls_closed_by",
+        "perDayFile": PER_DAY_PULLS_FILE,
         "date": "closed_at",
         "main": "closed_by",
         "mode": "AGG",
     },
     {
-        "key": "pulls_merged_by",
-        "perDayFile": f"{OUTPUT_DIR}/pullsPerDay.csv",
+        "id": "pulls_merged_by",
+        "perDayFile": PER_DAY_PULLS_FILE,
         "date": "merged_at",
         "main": "merged_by",
         "mode": "AGG",
     },
-    {"key": "stars"},
-    {"key": "interest"},
+    {"id": "stars", "perDayFile": PER_DAY_STARS_FILE},
+    {"id": "interest", "perDayFile": PER_DAY_INTEREST_FILE},
 ]
-REPO_NAME = config.get("REPO_URL").strip("/").split("/")[-1]
-
-get_commits(f"{OUTPUT_DIR}/commitsPerDay.csv", config.get("REPO_URL"))
-get_trends(f"{OUTPUT_DIR}/interestPerDay.csv", REPO_NAME)
 
 for feature in FEATURES:
-    key = feature["key"]
-    per_day = feature.get("perDayFile", f"{OUTPUT_DIR}/{key}PerDay.csv")
+    feature["finalFile"] = f"{OUTPUT_DIR}/final_{feature["id"]}.csv"
+    feature["emaFile"] = f"{OUTPUT_DIR}/ema_{feature["id"]}.csv"
+    feature["svgFile"] = f"{OUTPUT_DIR}/plot_{feature["id"]}.svg"
+
+REPO_NAME = config.get("REPO_URL").strip("/").split("/")[-1]
+
+get_commits(PER_DAY_COMMITS_FILE, config.get("REPO_URL"))
+get_trends(PER_DAY_INTEREST_FILE, REPO_NAME)
+
+for feature in FEATURES:
     date = feature.get("date", "date")
-    main = feature.get("main", "count")
     mode = feature.get("mode", "SUM")
 
-    final = f"{OUTPUT_DIR}/{key}Final.csv"
-    ewmas = f"{OUTPUT_DIR}/{key}EMA.csv"
-    svg = f"{OUTPUT_DIR}/{key}.svg"
+    parse_file(feature["perDayFile"], feature["finalFile"], date, feature.get("main", "count"), PERIOD, mode, only_full_months=True)
+    ewma(feature["finalFile"], feature["emaFile"])
+    plot(
+        feature["emaFile"],
+        feature["svgFile"],
+        feature["id"].replace("_", " ").title(),
+        REPO_NAME,
+    )
 
-    parse_file(per_day, final, date, main, PERIOD, mode)
-    ewma(final, ewmas, main)
-    plot(ewmas, svg, date, main, key.replace("_", " ").title(), REPO_NAME)
+merge_features(FEATURES, f"{OUTPUT_DIR}/merged_features.csv")
