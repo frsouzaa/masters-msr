@@ -17,8 +17,7 @@
   "scripts": {
     "index": "node --env-file=.env index.js",
     "graphql": "node --env-file=.env graphql.js",
-    "authors": "node --env-file=.env issuesAuthors.js; node --env-file=.env pullsAuthors.js",
-    "start": "npm run index; npm run graphql; npm run authors"
+    "start": "npm run index; npm run graphql"
   },
   "dependencies": {
     "@mrodrig/json-2-csv-cli": "^5.5.9",

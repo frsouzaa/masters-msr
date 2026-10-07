@@ -28,8 +28,15 @@ const getIssuesQuery = (after) => {
           createdAt
           closedAt
           author {
-            ... on User {
-              login
+            login
+          }
+          timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
+            nodes {
+              ... on ClosedEvent {
+                actor {
+                  login
+                }
+              }
             }
           }
         }
@@ -56,14 +63,19 @@ const getPullsQuery = (after) => {
           closedAt
           mergedAt
           author {
-            ... on User {
-              login
+            login
+          }
+          timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
+            nodes {
+              ... on ClosedEvent {
+                actor {
+                  login
+                }
+              }
             }
           }
           mergedBy {
-            ... on User {
-              login
-            }
+            login
           }
         }
         pageInfo {
@@ -97,11 +109,11 @@ const fetchAllIssues = (page, after = null, cache = []) => {
         created_at: issue.createdAt.split("T")[0],
         closed_at: issue.closedAt ? issue.closedAt.split("T")[0] : null,
         created_by: issue.author ? issue.author.login : null,
-        closed_by: null,
+        closed_by: issue.timelineItems.nodes[0] && issue.timelineItems.nodes[0].actor ? issue.timelineItems.nodes[0].actor.login : null,
         count: 1,
       })));
       if (pageInfo.hasNextPage) {
-        setTimeout(() => { fetchAllIssues(page + 1, after, cache) }, 3000)
+        setTimeout(() => { fetchAllIssues(page + 1, after, cache) }, 1000)
       } else {
         dumpVarIntoFile(cache, "per_day_issues");
       }
@@ -123,12 +135,12 @@ const fetchAllPulls = (page, after = null, cache = []) => {
         closed_at: pull.closedAt ? pull.closedAt.split("T")[0] : null,
         merged_at: pull.mergedAt ? pull.mergedAt.split("T")[0] : null,
         created_by: pull.author ? pull.author.login : null,
-        closed_by: null,
+        closed_by: pull.timelineItems.nodes[0] && pull.timelineItems.nodes[0].actor ? pull.timelineItems.nodes[0].actor.login : null,
         merged_by: pull.mergedBy ? pull.mergedBy.login : null,
         count: 1,
       })));
       if (pageInfo.hasNextPage) {
-        setTimeout(() => { fetchAllPulls(page + 1, after, cache) }, 3000)
+        setTimeout(() => { fetchAllPulls(page + 1, after, cache) }, 1000)
       } else {
         dumpVarIntoFile(cache, "per_day_pulls");
       }
