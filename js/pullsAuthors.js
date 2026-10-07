@@ -25,11 +25,14 @@ const parseCSVFile = async (filePath) => {
     const stream = fs.createReadStream(path);
     const parser = parse();
     const content = [];
+    let headers;
     stream.on("ready", () => {
       stream.pipe(parser);
     });
     parser.on("readable", function () {
-      const headers = parser.read();
+      if (!headers) {
+        headers = parser.read();
+      }
       let record;
       while (record = parser.read()) {
         const toJson = {};
@@ -63,7 +66,7 @@ const queuePullDetails = (pulls) => {
           console.log(`Pulls - PR ${pulls[i].number} encontrado com sucesso`);
           pulls[i].merged_by = result.data.merged_by ? result.data.merged_by.login : null
           if (queue.getQueueLength() === 0) {
-            dumpVarIntoFile(pulls, "per_day_pulls");
+            dumpVarIntoFile(pulls, "per_day_pulls_authors");
             queue.stop();
           }
         }
@@ -78,7 +81,7 @@ const queuePullDetails = (pulls) => {
           console.log(`Pulls - PR ${pulls[i].number} encontrado com sucesso`);
           pulls[i].closed_by = result.data.closed_by ? result.data.closed_by.login : null
           if (queue.getQueueLength() === 0) {
-            dumpVarIntoFile(pulls, "per_day_pulls");
+            dumpVarIntoFile(pulls, "per_day_pulls_authors");
             queue.stop();
           }
         }

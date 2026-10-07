@@ -25,11 +25,14 @@ const parseCSVFile = async (filePath) => {
     const stream = fs.createReadStream(path);
     const parser = parse();
     const content = [];
+    let headers;
     stream.on("ready", () => {
       stream.pipe(parser);
     });
     parser.on("readable", function () {
-      const headers = parser.read();
+      if (!headers) {
+        headers = parser.read();
+      }
       let record;
       while (record = parser.read()) {
         const toJson = {};
@@ -63,7 +66,7 @@ const queuePullDetails = (issues) => {
           console.log(`Issues - Issue ${issues[i].number} encontrado com sucesso`);
           issues[i].closed_by = result.data.closed_by ? result.data.closed_by.login : null
           if (queue.getQueueLength() === 0) {
-            dumpVarIntoFile(issues, "per_day_issues");
+            dumpVarIntoFile(issues, "per_day_issues_authors");
             queue.stop();
           }
         }

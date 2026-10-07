@@ -21,9 +21,11 @@ pyparsing==3.3.2
 PyQt6-Qt6==6.11.2
 PyQt6_sip==13.12.0
 python-dateutil==2.9.0.post0
+python-dotenv==1.2.3
 pytrends-modern==0.2.13
 pytz==2026.3.post1
 requests==2.34.2
+scipy==1.18.1
 six==1.17.0
 smmap==5.0.3
 types-pytz==2026.3.1.20260727

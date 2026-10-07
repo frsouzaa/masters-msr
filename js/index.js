@@ -102,36 +102,36 @@ const queueForksPerDay = (queue) => {
   queue.push(request);
 }
 
-const queuePullsPerDay = (queue, page = 1, cache = []) => {
-  const request = new GitHubApiRequest(
-    `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/pulls?per_page=${PULLS_API_PER_PAGE}&page=${page}&state=all`,
-    {},
-    (result) => {
-      console.log(`Pulls - Página ${page} processada com sucesso, quantidade de pull requests encontrados na página: ${result.data.length}`);
-      cache.push(...result.data.map(pull => ({
-        repo_id: pull.base.repo.id,
-        number: pull.number,
-        html_url: pull.html_url,
-        created_at: pull.created_at.split("T")[0],
-        closed_at: pull.closed_at ? pull.closed_at.split("T")[0] : null,
-        merged_at: pull.merged_at ? pull.merged_at.split("T")[0] : null,
-        created_by: pull.user.login,
-        closed_by: null,
-        merged_by: null,
-        count: 1,
-      })));
-      if (result.data.length < PULLS_API_PER_PAGE) {
-        dumpVarIntoFile(cache, "per_day_pulls");
-        if (queue.getQueueLength() === 0) {
-          queue.stop();
-        }
-        return;
-      }
-      queuePullsPerDay(queue, page + 1, cache);
-    }
-  );
-  queue.push(request);
-}
+// const queuePullsPerDay = (queue, page = 1, cache = []) => {
+//   const request = new GitHubApiRequest(
+//     `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/pulls?per_page=${PULLS_API_PER_PAGE}&page=${page}&state=all`,
+//     {},
+//     (result) => {
+//       console.log(`Pulls - Página ${page} processada com sucesso, quantidade de pull requests encontrados na página: ${result.data.length}`);
+//       cache.push(...result.data.map(pull => ({
+//         repo_id: pull.base.repo.id,
+//         number: pull.number,
+//         html_url: pull.html_url,
+//         created_at: pull.created_at.split("T")[0],
+//         closed_at: pull.closed_at ? pull.closed_at.split("T")[0] : null,
+//         merged_at: pull.merged_at ? pull.merged_at.split("T")[0] : null,
+//         created_by: pull.user.login,
+//         closed_by: null,
+//         merged_by: null,
+//         count: 1,
+//       })));
+//       if (result.data.length < PULLS_API_PER_PAGE) {
+//         dumpVarIntoFile(cache, "per_day_pulls");
+//         if (queue.getQueueLength() === 0) {
+//           queue.stop();
+//         }
+//         return;
+//       }
+//       queuePullsPerDay(queue, page + 1, cache);
+//     }
+//   );
+//   queue.push(request);
+// }
 
 // Rest API não funciona para projetos com mais de 10000 issues, a alternativa é utilizar GraphQL
 // const queueIssuesPerDay = (queue, page=1, cache=[]) => {
@@ -164,5 +164,4 @@ let queue = new GitHubApiQueue([getApiClient()]);
 
 queueStarsPerDay(queue);
 queueForksPerDay(queue);
-queuePullsPerDay(queue);
 queue.start();

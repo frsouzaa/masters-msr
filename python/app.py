@@ -5,8 +5,11 @@ from parse import parse_file
 from ewma import ewma
 from plot import plot
 from merge import merge_features
+from correlation import calculate_correlation
 
 config = dotenv.dotenv_values()
+
+REPO_NAME = config.get("REPO_URL").strip("/").split("/")[-1]
 
 OUTPUT_DIR = "outputs"
 PERIOD = "MONTHLY"  # DAILY | MONTHLY
@@ -17,6 +20,8 @@ PER_DAY_ISSUES_FILE = f"{OUTPUT_DIR}/per_day_issues.csv"
 PER_DAY_PULLS_FILE = f"{OUTPUT_DIR}/per_day_pulls.csv"
 PER_DAY_STARS_FILE = f"{OUTPUT_DIR}/per_day_stars.csv"
 PER_DAY_INTEREST_FILE = f"{OUTPUT_DIR}/per_day_interest.csv"
+
+MERGED_FILE = f"{OUTPUT_DIR}/merged_features.csv"
 
 FEATURES = [
     {
@@ -102,8 +107,6 @@ for feature in FEATURES:
     feature["emaFile"] = f"{OUTPUT_DIR}/ema_{feature["id"]}.csv"
     feature["svgFile"] = f"{OUTPUT_DIR}/plot_{feature["id"]}.svg"
 
-REPO_NAME = config.get("REPO_URL").strip("/").split("/")[-1]
-
 get_commits(PER_DAY_COMMITS_FILE, config.get("REPO_URL"))
 get_trends(PER_DAY_INTEREST_FILE, REPO_NAME)
 
@@ -120,4 +123,6 @@ for feature in FEATURES:
         REPO_NAME,
     )
 
-merge_features(FEATURES, f"{OUTPUT_DIR}/merged_features.csv")
+merge_features(FEATURES, MERGED_FILE)
+
+calculate_correlation(MERGED_FILE)
