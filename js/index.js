@@ -5,6 +5,8 @@ import fs from "fs";
 const GH_API_BASE_URL = "https://api.github.com";
 const GH_TOKEN = process.env.GH_TOKEN;
 const REPO_OWNER_NAME = process.env.REPO_URL.split("github.com/")[1];
+const REPO_OWNER = process.env.REPO_URL.split("github.com/")[1].split("/")[0];
+const REPO_NAME = process.env.REPO_URL.split("github.com/")[1].split("/")[1];
 const STARS_API_PER_PAGE = 30; // https://docs.github.com/en/rest/activity/starring?apiVersion=2026-03-10#get-repository-star-history
 const FORKS_API_PER_PAGE = 100; // https://docs.github.com/en/rest/repos/forks?apiVersion=2026-03-10#list-forks
 const PULLS_API_PER_PAGE = 100; // https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#list-pull-requests
@@ -35,14 +37,14 @@ const queueStarsPerDay = (queue) => {
     `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}`,
     {},
     (result) => {
-      console.log(`Stars - Repositório ${REPO_OWNER_NAME} encontrado com sucesso, data de criação: ${result.data.created_at}`);
+      console.log(`Stars - Repository ${REPO_OWNER_NAME} found, creation date: ${result.data.created_at}`);
       const number_of_pages = Math.ceil(getWeeksBetween(new Date(result.data.created_at), new Date()) / STARS_API_PER_PAGE);
       for (let i = 1; i <= number_of_pages; i++) {
         const request = new GitHubApiRequest(
           `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/stargazers/history?per_page=${STARS_API_PER_PAGE}&page=${i}`,
           {},
           (result) => {
-            console.log(`Stars - Página ${i} processada com sucesso!`);
+            console.log(`Stars - page ${i}`);
             for (let j = 0; j < result.data.length; j++) {
               for (let k = 0; k < result.data[j].days.length; k++) {
                 starsPerDay.push({
@@ -52,7 +54,6 @@ const queueStarsPerDay = (queue) => {
               }
             }
             if (i === 1) {
-              console.log("Stars - Todas as páginas foram processadas com sucesso!");
               dumpVarIntoFile(starsPerDay, "per_day_stars");
               if (queue.getQueueLength() === 0) {
                 queue.stop();
@@ -73,21 +74,20 @@ const queueForksPerDay = (queue) => {
     `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}`,
     {},
     (result) => {
-      console.log(`Forks - Repositório ${REPO_OWNER_NAME} encontrado com sucesso, quantidade de forks: ${result.data.forks_count}`);
+      console.log(`Forks - Repository ${REPO_OWNER_NAME} found, fork count: ${result.data.forks_count}`);
       const number_of_pages = Math.ceil(result.data.forks_count / FORKS_API_PER_PAGE);
       for (let i = 1; i <= number_of_pages; i++) {
         const request = new GitHubApiRequest(
           `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/forks?per_page=${FORKS_API_PER_PAGE}&page=${i}&sort=newest`,
           {},
           (result) => {
-            console.log(`Forks - Página ${i} processada com sucesso, quantidade de forks encontrados na página: ${result.data.length}`);
+            console.log(`Forks - page ${i}`);
             forksPerDay.push(...result.data.map(fork => ({
               html_url: fork.html_url,
               date: fork.created_at.split("T")[0],
               count: 1,
             })));
             if (i === 1) {
-              console.log("Forks - Todas as páginas foram processadas com sucesso!");
               dumpVarIntoFile(forksPerDay, "per_day_forks");
               if (queue.getQueueLength() === 0) {
                 queue.stop();
@@ -102,66 +102,155 @@ const queueForksPerDay = (queue) => {
   queue.push(request);
 }
 
-// const queuePullsPerDay = (queue, page = 1, cache = []) => {
-//   const request = new GitHubApiRequest(
-//     `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/pulls?per_page=${PULLS_API_PER_PAGE}&page=${page}&state=all`,
-//     {},
-//     (result) => {
-//       console.log(`Pulls - Página ${page} processada com sucesso, quantidade de pull requests encontrados na página: ${result.data.length}`);
-//       cache.push(...result.data.map(pull => ({
-//         repo_id: pull.base.repo.id,
-//         number: pull.number,
-//         html_url: pull.html_url,
-//         created_at: pull.created_at.split("T")[0],
-//         closed_at: pull.closed_at ? pull.closed_at.split("T")[0] : null,
-//         merged_at: pull.merged_at ? pull.merged_at.split("T")[0] : null,
-//         created_by: pull.user.login,
-//         closed_by: null,
-//         merged_by: null,
-//         count: 1,
-//       })));
-//       if (result.data.length < PULLS_API_PER_PAGE) {
-//         dumpVarIntoFile(cache, "per_day_pulls");
-//         if (queue.getQueueLength() === 0) {
-//           queue.stop();
-//         }
-//         return;
-//       }
-//       queuePullsPerDay(queue, page + 1, cache);
-//     }
-//   );
-//   queue.push(request);
-// }
+const queuePullsPerDay = (queue, page = 1, after = null, cache = []) => {
+  const afterString = after ? `, after: "${after}"` : ""
+  const request = new GitHubApiRequest(
+    `${GH_API_BASE_URL}/graphql`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        query: `{
+          repository(owner: "${REPO_OWNER}", name: "${REPO_NAME}") { 
+            pullRequests(first: ${PULLS_API_PER_PAGE} ${afterString}) {
+              nodes {
+                repository {
+                  databaseId
+                }
+                url
+                number
+                createdAt
+                closedAt
+                mergedAt
+                author {
+                  login
+                }
+                timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
+                  nodes {
+                    ... on ClosedEvent {
+                      actor {
+                        login
+                      }
+                    }
+                  }
+                }
+                mergedBy {
+                  login
+                }
+              }
+              pageInfo {
+                endCursor
+                startCursor
+                hasNextPage
+                hasPreviousPage
+              }
+            }
+          }
+        }`
+      })
+    },
+    (result) => {
+      const nodes = result.data.data.repository.pullRequests.nodes;
+      const pageInfo = result.data.data.repository.pullRequests.pageInfo;
+      console.log(`Pulls - page ${page}, after ${after}`);
+      cache.push(...nodes.map(pull => ({
+        repo_id: pull.repository.databaseId,
+        number: pull.number,
+        html_url: pull.url,
+        created_at: pull.createdAt.split("T")[0],
+        closed_at: pull.closedAt ? pull.closedAt.split("T")[0] : null,
+        merged_at: pull.mergedAt ? pull.mergedAt.split("T")[0] : null,
+        created_by: pull.author ? pull.author.login : null,
+        closed_by: pull.timelineItems.nodes[0] && pull.timelineItems.nodes[0].actor ? pull.timelineItems.nodes[0].actor.login : null,
+        merged_by: pull.mergedBy ? pull.mergedBy.login : null,
+        count: 1,
+      })));
+      if (!pageInfo.hasNextPage) {
+        dumpVarIntoFile(cache, "per_day_pulls");
+        if (queue.getQueueLength() === 0) {
+          queue.stop();
+        }
+        return;
+      }
+      queuePullsPerDay(queue, page + 1, pageInfo.endCursor, cache);
+    }
+  );
+  queue.push(request);
+}
 
-// Rest API não funciona para projetos com mais de 10000 issues, a alternativa é utilizar GraphQL
-// const queueIssuesPerDay = (queue, page=1, cache=[]) => {
-//   const request = new GitHubApiRequest(
-//     `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/issues?per_page=${ISSUES_API_PER_PAGE}&page=${page}&state=all`,
-//     {},
-//     (result) => {
-//       console.log(`Issues - Página ${page} processada com sucesso, quantidade de issues encontrados na página: ${result.data.length}`);
-//       cache.push(...result.data.filter(issue => issue.pull_request == null).map(issue => ({
-//         html_url: issue.html_url,
-//         created_at: issue.created_at.split("T")[0],
-//         closed_at: issue.closed_at ? issue.closed_at.split("T")[0] : null,
-//         merged_at: issue.merged_at ? issue.merged_at.split("T")[0] : null,
-//         count: 1,
-//       })));
-//       if (result.data.length < ISSUES_API_PER_PAGE) {
-//         dumpVarIntoFile(cache, "per_day_issues");
-//         if (queue.getQueueLength() === 0) {
-//           queue.stop();
-//         }
-//         return;
-//       }
-//       queueIssuesPerDay(queue, page + 1, cache);
-//     }
-//   );
-//   queue.push(request);
-// }
+const queueIssuesPerDay = (queue, page=1, after=null, cache=[]) => {
+  const afterString = after ? `, after: "${after}"` : ""
+  const request = new GitHubApiRequest(
+    `${GH_API_BASE_URL}/graphql`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        query: `{
+          repository(owner: "${REPO_OWNER}", name: "${REPO_NAME}") { 
+            issues(first: ${ISSUES_API_PER_PAGE} ${afterString}) {
+              nodes {
+                repository {
+                  databaseId
+                }
+                url
+                number
+                createdAt
+                closedAt
+                author {
+                  login
+                }
+                timelineItems(itemTypes: [CLOSED_EVENT], last: 1) {
+                  nodes {
+                    ... on ClosedEvent {
+                      actor {
+                        login
+                      }
+                    }
+                  }
+                }
+              }
+              pageInfo {
+                endCursor
+                startCursor
+                hasNextPage
+                hasPreviousPage
+              }
+            }
+          }
+        }`
+      })
+    },
+    (result) => {
+      const nodes = result.data.data.repository.issues.nodes;
+      const pageInfo = result.data.data.repository.issues.pageInfo;
+      console.log(`Issues - page ${page}, after ${after}`);
+      cache.push(...nodes.map(issue => ({
+        repo_id: issue.repository.databaseId,
+        number: issue.number,
+        html_url: issue.url,
+        created_at: issue.createdAt.split("T")[0],
+        closed_at: issue.closedAt ? issue.closedAt.split("T")[0] : null,
+        created_by: issue.author ? issue.author.login : null,
+        closed_by: issue.timelineItems.nodes[0] && issue.timelineItems.nodes[0].actor ? issue.timelineItems.nodes[0].actor.login : null,
+        count: 1,
+      })));
+      if (!pageInfo.hasNextPage) {
+        dumpVarIntoFile(cache, "per_day_issues");
+        if (queue.getQueueLength() === 0) {
+          queue.stop();
+        }
+        return;
+      }
+      queueIssuesPerDay(queue, page + 1, pageInfo.endCursor, cache);
+    }
+  );
+  queue.push(request);
+}
 
 let queue = new GitHubApiQueue([getApiClient()]);
 
 queueStarsPerDay(queue);
 queueForksPerDay(queue);
+queuePullsPerDay(queue);
+queueIssuesPerDay(queue);
+
 queue.start();

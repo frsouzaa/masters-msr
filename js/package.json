@@ -11,13 +11,12 @@
     "url": "git+https://github.com/frsouzaa/masters-msr.git"
   },
   "license": "ISC",
-  "author": "",
+  "author": "Felipe Ribeiro de Souza",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "index": "node --env-file=.env index.js",
-    "graphql": "node --env-file=.env graphql.js",
-    "start": "npm run index; npm run graphql"
+    "start": "npm run index"
   },
   "dependencies": {
     "@mrodrig/json-2-csv-cli": "^5.5.9",

@@ -1,19 +1,20 @@
 import pandas as pd
 
 
-def calculate_correlation(input_file):
+def calculate_correlation(input_file, verbose=False):
     df = pd.read_csv(input_file)
 
     spearman = df.corr(method="spearman", numeric_only=True)
     pearson = df.corr(method="pearson", numeric_only=True)
     kendall = df.corr(method="kendall", numeric_only=True)
 
-    print("Spearman Correlation:")
-    search_correlation(spearman)
-    print("Pearson Correlation:")
-    search_correlation(pearson)
-    print("Kendall Correlation:")
-    search_correlation(kendall)
+    if verbose:
+        print("Spearman Correlation:")
+        search_correlation(spearman)
+        print("Pearson Correlation:")
+        search_correlation(pearson)
+        print("Kendall Correlation:")
+        search_correlation(kendall)
 
     spearman.to_csv("outputs/correlation_spearman.csv")
     pearson.to_csv("outputs/correlation_pearson.csv")
