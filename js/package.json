@@ -20,8 +20,6 @@
   },
   "dependencies": {
     "@mrodrig/json-2-csv-cli": "^5.5.9",
-    "csv-parse": "^7.0.3",
-    "graphql-request": "^7.4.0",
     "poolingh": "^1.0.3"
   }
 }
