@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def calculate_correlation(input_file, verbose=False):
+def calculate_correlation(input_file, output_folder, verbose=False):
     df = pd.read_csv(input_file)
 
     spearman = df.corr(method="spearman", numeric_only=True)
@@ -16,9 +16,9 @@ def calculate_correlation(input_file, verbose=False):
         print("Kendall Correlation:")
         search_correlation(kendall)
 
-    spearman.to_csv("outputs/correlation_spearman.csv")
-    pearson.to_csv("outputs/correlation_pearson.csv")
-    kendall.to_csv("outputs/correlation_kendall.csv")
+    spearman.to_csv(f"{output_folder}/correlation_spearman.csv")
+    pearson.to_csv(f"{output_folder}/correlation_pearson.csv")
+    kendall.to_csv(f"{output_folder}/correlation_kendall.csv")
 
 
 def search_correlation(df):

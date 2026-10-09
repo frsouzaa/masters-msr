@@ -26,7 +26,7 @@ const getWeeksBetween = (date1, date2) => {
 }
 
 const dumpVarIntoFile = (date, fileName) => {
-  fs.writeFile(`outputs/${fileName}.csv`, json2csv(date), (err) => {
+  fs.writeFile(`outputs/${REPO_NAME}/${fileName}.csv`, json2csv(date), (err) => {
     if (err) throw err;
   });
 }

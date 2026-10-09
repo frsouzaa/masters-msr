@@ -11,7 +11,7 @@ config = dotenv.dotenv_values()
 
 REPO_NAME = config.get("REPO_URL").strip("/").split("/")[-1]
 
-OUTPUT_DIR = "outputs"
+OUTPUT_DIR = f"outputs/{REPO_NAME}"
 PERIOD = "MONTHLY"  # DAILY | MONTHLY
 
 PER_DAY_COMMITS_FILE = f"{OUTPUT_DIR}/per_day_commits.csv"
@@ -113,8 +113,12 @@ get_trends(PER_DAY_INTEREST_FILE, REPO_NAME)
 for feature in FEATURES:
     date = feature.get("date", "date")
     mode = feature.get("mode", "SUM")
-
-    parse_file(feature["perDayFile"], feature["finalFile"], date, feature.get("main", "count"), PERIOD, mode, only_full_months=True)
+    
+    try:
+        parse_file(feature["perDayFile"], feature["finalFile"], date, feature.get("main", "count"), PERIOD, mode, only_full_months=True)
+    except Exception as e:
+        print(f"Error parsing {feature["perDayFile"]}: {e}")
+        continue
     ewma(feature["finalFile"], feature["emaFile"])
     plot(
         feature["emaFile"],
@@ -125,4 +129,4 @@ for feature in FEATURES:
 
 merge_features(FEATURES, MERGED_FILE)
 
-calculate_correlation(MERGED_FILE)
+calculate_correlation(MERGED_FILE, OUTPUT_DIR)
