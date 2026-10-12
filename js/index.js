@@ -4,9 +4,15 @@ import fs from "fs";
 
 const GH_API_BASE_URL = "https://api.github.com";
 const GH_TOKEN = process.env.GH_TOKEN;
-const REPO_OWNER_NAME = process.env.REPO_URL.split("github.com/")[1];
-const REPO_OWNER = process.env.REPO_URL.split("github.com/")[1].split("/")[0];
-const REPO_NAME = process.env.REPO_URL.split("github.com/")[1].split("/")[1];
+const REPO_URL = process.argv[process.argv.length - 1];
+
+if (!REPO_URL || !REPO_URL.includes("github.com")) {
+  console.error("Please provide a valid GitHub repository URL as an argument.");
+  process.exit(1);
+}
+
+const REPO_OWNER = REPO_URL.split("github.com/")[1].split("/")[0];
+const REPO_NAME = REPO_URL.split("github.com/")[1].split("/")[1];
 const STARS_API_PER_PAGE = 30; // https://docs.github.com/en/rest/activity/starring?apiVersion=2026-03-10#get-repository-star-history
 const FORKS_API_PER_PAGE = 100; // https://docs.github.com/en/rest/repos/forks?apiVersion=2026-03-10#list-forks
 const PULLS_API_PER_PAGE = 100; // https://docs.github.com/en/rest/pulls/pulls?apiVersion=2026-03-10#list-pull-requests
@@ -26,6 +32,9 @@ const getWeeksBetween = (date1, date2) => {
 }
 
 const dumpVarIntoFile = (date, fileName) => {
+  if (!fs.existsSync(`outputs/${REPO_NAME}`)){
+    fs.mkdirSync(`outputs/${REPO_NAME}`);
+  }
   fs.writeFile(`outputs/${REPO_NAME}/${fileName}.csv`, json2csv(date), (err) => {
     if (err) throw err;
   });
@@ -34,14 +43,14 @@ const dumpVarIntoFile = (date, fileName) => {
 const queueStarsPerDay = (queue) => {
   const starsPerDay = [];
   const request = new GitHubApiRequest(
-    `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}`,
+    `${GH_API_BASE_URL}/repos/${REPO_OWNER}/${REPO_NAME}`,
     {},
     (result) => {
-      console.log(`Stars - Repository ${REPO_OWNER_NAME} found, creation date: ${result.data.created_at}`);
+      console.log(`Stars - Repository ${REPO_OWNER}/${REPO_NAME} found, creation date: ${result.data.created_at}`);
       const number_of_pages = Math.ceil(getWeeksBetween(new Date(result.data.created_at), new Date()) / STARS_API_PER_PAGE);
       for (let i = 1; i <= number_of_pages; i++) {
         const request = new GitHubApiRequest(
-          `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/stargazers/history?per_page=${STARS_API_PER_PAGE}&page=${i}`,
+          `${GH_API_BASE_URL}/repos/${REPO_OWNER}/${REPO_NAME}/stargazers/history?per_page=${STARS_API_PER_PAGE}&page=${i}`,
           {},
           (result) => {
             console.log(`Stars - page ${i}`);
@@ -71,14 +80,14 @@ const queueStarsPerDay = (queue) => {
 const queueForksPerDay = (queue) => {
   const forksPerDay = [];
   const request = new GitHubApiRequest(
-    `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}`,
+    `${GH_API_BASE_URL}/repos/${REPO_OWNER}/${REPO_NAME}`,
     {},
     (result) => {
-      console.log(`Forks - Repository ${REPO_OWNER_NAME} found, fork count: ${result.data.forks_count}`);
+      console.log(`Forks - Repository ${REPO_OWNER}/${REPO_NAME} found, fork count: ${result.data.forks_count}`);
       const number_of_pages = Math.ceil(result.data.forks_count / FORKS_API_PER_PAGE);
       for (let i = 1; i <= number_of_pages; i++) {
         const request = new GitHubApiRequest(
-          `${GH_API_BASE_URL}/repos/${REPO_OWNER_NAME}/forks?per_page=${FORKS_API_PER_PAGE}&page=${i}&sort=newest`,
+          `${GH_API_BASE_URL}/repos/${REPO_OWNER}/${REPO_NAME}/forks?per_page=${FORKS_API_PER_PAGE}&page=${i}&sort=newest`,
           {},
           (result) => {
             console.log(`Forks - page ${i}`);

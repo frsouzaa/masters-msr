@@ -1,4 +1,4 @@
-import dotenv
+import sys
 from commits import get_commits
 from trends import get_trends
 from parse import parse_file
@@ -7,9 +7,8 @@ from plot import plot
 from merge import merge_features
 from correlation import calculate_correlation
 
-config = dotenv.dotenv_values()
-
-REPO_NAME = config.get("REPO_URL").strip("/").split("/")[-1]
+REPO_URL = sys.argv[-1]
+REPO_NAME = REPO_URL.strip("/").split("/")[-1]
 
 OUTPUT_DIR = f"outputs/{REPO_NAME}"
 PERIOD = "MONTHLY"  # DAILY | MONTHLY
@@ -107,15 +106,23 @@ for feature in FEATURES:
     feature["emaFile"] = f"{OUTPUT_DIR}/ema_{feature["id"]}.csv"
     feature["svgFile"] = f"{OUTPUT_DIR}/plot_{feature["id"]}.svg"
 
-get_commits(PER_DAY_COMMITS_FILE, config.get("REPO_URL"))
+get_commits(PER_DAY_COMMITS_FILE, REPO_URL)
 get_trends(PER_DAY_INTEREST_FILE, REPO_NAME)
 
 for feature in FEATURES:
     date = feature.get("date", "date")
     mode = feature.get("mode", "SUM")
-    
+
     try:
-        parse_file(feature["perDayFile"], feature["finalFile"], date, feature.get("main", "count"), PERIOD, mode, only_full_months=True)
+        parse_file(
+            feature["perDayFile"],
+            feature["finalFile"],
+            date,
+            feature.get("main", "count"),
+            PERIOD,
+            mode,
+            only_full_months=True,
+        )
     except Exception as e:
         print(f"Error parsing {feature["perDayFile"]}: {e}")
         continue
