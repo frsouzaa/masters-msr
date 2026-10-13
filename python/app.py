@@ -1,11 +1,11 @@
 import sys
 from commits import get_commits
 from trends import get_trends
-from parse import parse_file
+from parse import parse_file, pre_parse_issues_closed
 from ewma import ewma
 from plot import plot
 from merge import merge_features
-from correlation import calculate_correlation
+from statistic import anderson_darling, correlation
 
 REPO_URL = sys.argv[-1]
 REPO_NAME = REPO_URL.strip("/").split("/")[-1]
@@ -19,10 +19,12 @@ PER_DAY_ISSUES_FILE = f"{OUTPUT_DIR}/per_day_issues.csv"
 PER_DAY_PULLS_FILE = f"{OUTPUT_DIR}/per_day_pulls.csv"
 PER_DAY_STARS_FILE = f"{OUTPUT_DIR}/per_day_stars.csv"
 PER_DAY_INTEREST_FILE = f"{OUTPUT_DIR}/per_day_interest.csv"
+PER_DAY_CLOSED_PULLS_FILE = f"{OUTPUT_DIR}/per_day_closed_pulls.csv"
 
 MERGED_FILE = f"{OUTPUT_DIR}/merged_features.csv"
+ANDERSON_DARLING_FILE = f"{OUTPUT_DIR}/anderson_darling_test.csv"
 
-FEATURES = [
+FEATURES_PIPELINE = [
     {
         "id": "commits",
         "perDayFile": PER_DAY_COMMITS_FILE,
@@ -38,12 +40,12 @@ FEATURES = [
         "perDayFile": PER_DAY_FORKS_FILE,
     },
     {
-        "id": "created_issues",
+        "id": "issues_created",
         "perDayFile": PER_DAY_ISSUES_FILE,
         "date": "created_at",
     },
     {
-        "id": "closed_issues",
+        "id": "issues_closed",
         "perDayFile": PER_DAY_ISSUES_FILE,
         "date": "closed_at",
     },
@@ -62,17 +64,24 @@ FEATURES = [
         "mode": "AGG",
     },
     {
-        "id": "created_pulls",
+        "id": "pulls_created",
         "perDayFile": PER_DAY_PULLS_FILE,
         "date": "created_at",
     },
     {
-        "id": "closed_pulls",
-        "perDayFile": PER_DAY_PULLS_FILE,
+        "id": "pulls_closed",
+        "perDayFile": PER_DAY_CLOSED_PULLS_FILE,
         "date": "closed_at",
+        "pre_parse_func": pre_parse_issues_closed,
+        "pre_parse_kwargs": {
+            "input_file": PER_DAY_PULLS_FILE,
+            "output_file": PER_DAY_CLOSED_PULLS_FILE,
+            "closed_column": "closed_at",
+            "merged_column": "merged_at",
+        }
     },
     {
-        "id": "merged_pulls",
+        "id": "pulls_merged",
         "perDayFile": PER_DAY_PULLS_FILE,
         "date": "merged_at",
     },
@@ -85,7 +94,7 @@ FEATURES = [
     },
     {
         "id": "pulls_closed_by",
-        "perDayFile": PER_DAY_PULLS_FILE,
+        "perDayFile": PER_DAY_CLOSED_PULLS_FILE,
         "date": "closed_at",
         "main": "closed_by",
         "mode": "AGG",
@@ -101,7 +110,7 @@ FEATURES = [
     {"id": "interest", "perDayFile": PER_DAY_INTEREST_FILE},
 ]
 
-for feature in FEATURES:
+for feature in FEATURES_PIPELINE:
     feature["finalFile"] = f"{OUTPUT_DIR}/final_{feature["id"]}.csv"
     feature["emaFile"] = f"{OUTPUT_DIR}/ema_{feature["id"]}.csv"
     feature["svgFile"] = f"{OUTPUT_DIR}/plot_{feature["id"]}.svg"
@@ -109,11 +118,13 @@ for feature in FEATURES:
 get_commits(PER_DAY_COMMITS_FILE, REPO_URL)
 get_trends(PER_DAY_INTEREST_FILE, REPO_NAME)
 
-for feature in FEATURES:
+for feature in FEATURES_PIPELINE:
     date = feature.get("date", "date")
     mode = feature.get("mode", "SUM")
 
     try:
+        if "pre_parse_func" in feature:
+            feature["pre_parse_func"](**feature.get("pre_parse_kwargs", {}))
         parse_file(
             feature["perDayFile"],
             feature["finalFile"],
@@ -134,6 +145,7 @@ for feature in FEATURES:
         REPO_NAME,
     )
 
-merge_features(FEATURES, MERGED_FILE)
+merge_features(FEATURES_PIPELINE, MERGED_FILE)
 
-calculate_correlation(MERGED_FILE, OUTPUT_DIR)
+anderson_darling(MERGED_FILE, ANDERSON_DARLING_FILE)
+correlation(MERGED_FILE, OUTPUT_DIR)

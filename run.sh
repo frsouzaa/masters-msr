@@ -1,8 +1,15 @@
 #!/bin/bash
 
+url=$1
+
 source python/env/bin/activate
 
-while read repo; do
-    npm --prefix js start "$repo"
-    python python/app.py "$repo"
-done < repos.txt
+if [ -z "$url" ]; then
+    while read repo_url; do
+        npm --prefix js start "$repo_url"
+        python python/app.py "$repo_url"
+    done < repos.txt
+else
+    npm --prefix js start "$url"
+    python python/app.py "$url"
+fi

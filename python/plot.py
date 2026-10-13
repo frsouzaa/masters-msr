@@ -60,8 +60,8 @@ def plot(input_file, output_file, feature, name, concat_file=None, concat_name=N
         ax.plot(df.index, df[f"{concat_name}_ema12"], label=f"{concat_name}: EMA-12", linewidth=LINE_WIDTH)
         ax.plot(df.index, df[f"{concat_name}_ema24"], label=f"{concat_name}: EMA-24", linewidth=LINE_WIDTH)
         # ax.plot(df.index, df[f"{concat_name}_ema48"], label=f"{concat_name}: EMA-48", linewidth=LINE_WIDTH)
-    pace = len(df.index.values) / 22
-    ax.set_xticks(df.index.values[0 :: int(pace)])
+    pace = len(df.index.values) / 20
+    ax.set_xticks(df.index.values[0 :: max(1, int(pace))])
     ax.legend()
     ax.set_title(f"{feature} for {name}{f" and {concat_name}" if concat_name else ""}")
     

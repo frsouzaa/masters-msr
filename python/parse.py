@@ -1,5 +1,19 @@
 from datetime import datetime
 import pandas as pd
+import numpy as np
+
+
+def pre_parse_issues_closed(**kwargs):
+    input_file = kwargs.get("input_file")
+    output_file = kwargs.get("output_file")
+    closed_column = kwargs.get("closed_column")
+    merged_column = kwargs.get("merged_column")
+
+    df = pd.read_csv(input_file)
+
+    df = df.loc[(df[closed_column].notnull()) & (df[merged_column].isnull())]
+
+    df.to_csv(output_file, index=False)
 
 
 def parse_file(
@@ -41,7 +55,7 @@ def parse_file(
                     df,
                     pd.DataFrame(
                         [[minDate.strftime(pattern), 0, summation]],
-                        columns=[date_column, main_column, "summation"],
+                        columns=df.columns.values
                     ),
                 ]
             )
