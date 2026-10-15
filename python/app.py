@@ -1,11 +1,11 @@
 import sys
 from commits import get_commits
 from trends import get_trends
-from parse import parse_file, pre_parse_issues_closed
+from parse import parse_file, pre_parse_pulls_closed
 from ewma import ewma
-from plot import plot
+from plot import plot_ema, plot_correlation_matrix
 from merge import merge_features
-from statistic import anderson_darling, correlation
+from statistic import anderson_darling, correlation, merge_correlation_by_anderson_darling
 
 REPO_URL = sys.argv[-1]
 REPO_NAME = REPO_URL.strip("/").split("/")[-1]
@@ -23,6 +23,7 @@ PER_DAY_CLOSED_PULLS_FILE = f"{OUTPUT_DIR}/per_day_closed_pulls.csv"
 
 MERGED_FILE = f"{OUTPUT_DIR}/merged_features.csv"
 ANDERSON_DARLING_FILE = f"{OUTPUT_DIR}/anderson_darling_test.csv"
+CORRELATION_FINAL_FILE = f"{OUTPUT_DIR}/correlation_final.csv"
 
 FEATURES_PIPELINE = [
     {
@@ -72,7 +73,7 @@ FEATURES_PIPELINE = [
         "id": "pulls_closed",
         "perDayFile": PER_DAY_CLOSED_PULLS_FILE,
         "date": "closed_at",
-        "pre_parse_func": pre_parse_issues_closed,
+        "pre_parse_func": pre_parse_pulls_closed,
         "pre_parse_kwargs": {
             "input_file": PER_DAY_PULLS_FILE,
             "output_file": PER_DAY_CLOSED_PULLS_FILE,
@@ -138,7 +139,7 @@ for feature in FEATURES_PIPELINE:
         print(f"Error parsing {feature["perDayFile"]}: {e}")
         continue
     ewma(feature["finalFile"], feature["emaFile"])
-    plot(
+    plot_ema(
         feature["emaFile"],
         feature["svgFile"],
         feature["id"].replace("_", " ").title(),
@@ -148,4 +149,9 @@ for feature in FEATURES_PIPELINE:
 merge_features(FEATURES_PIPELINE, MERGED_FILE)
 
 anderson_darling(MERGED_FILE, ANDERSON_DARLING_FILE)
-correlation(MERGED_FILE, OUTPUT_DIR)
+
+spearman_file, pearson_file = correlation(MERGED_FILE, OUTPUT_DIR)
+
+merge_correlation_by_anderson_darling(spearman_file, pearson_file, ANDERSON_DARLING_FILE, CORRELATION_FINAL_FILE)
+
+plot_correlation_matrix(CORRELATION_FINAL_FILE, f"{OUTPUT_DIR}/plot_correlation_final.svg")

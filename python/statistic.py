@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import anderson, MonteCarloMethod
+from itertools import permutations
 
 
 def anderson_darling(input_file, output_file):
@@ -44,8 +45,12 @@ def correlation(input_file, output_folder, verbose=False):
         print("Pearson Correlation:")
         search_correlation(pearson)
 
-    spearman.to_csv(f"{output_folder}/correlation_spearman.csv")
-    pearson.to_csv(f"{output_folder}/correlation_pearson.csv")
+    spearman_file = f"{output_folder}/correlation_spearman.csv"
+    pearson_file = f"{output_folder}/correlation_pearson.csv"
+    spearman.to_csv(spearman_file)
+    pearson.to_csv(pearson_file)
+
+    return spearman_file, pearson_file
 
 
 def search_correlation(df):
@@ -60,3 +65,27 @@ def search_correlation(df):
                 correlations_found.add(f"{column}-{row}")
                 correlations_found.add(f"{row}-{column}")
                 print(f"High correlation between {column} and {row}: {df[column][row]}")
+
+
+def merge_correlation_by_anderson_darling(
+    spearman_file, pearson_file, anderson_darling_file, output_file
+):
+    spearman = pd.read_csv(spearman_file)
+    pearson = pd.read_csv(pearson_file)
+    anderson_darling = pd.read_csv(anderson_darling_file)
+
+    normal_distributions = permutations(
+        anderson_darling.loc[(anderson_darling["distribution"] == "normal")][
+            "feature"
+        ].values,
+        2,
+    )
+
+    pearson_rows = spearman[spearman.columns[0]].values.tolist()
+
+    for normal_distribution in normal_distributions:
+        row_index = pearson_rows.index(normal_distribution[1])
+        value = pearson[normal_distribution[0]][row_index]
+        spearman.loc[row_index, normal_distribution[0]] = value
+
+    spearman.to_csv(output_file, index=False)

@@ -1,9 +1,8 @@
 from datetime import datetime
 import pandas as pd
-import numpy as np
 
 
-def pre_parse_issues_closed(**kwargs):
+def pre_parse_pulls_closed(**kwargs):
     input_file = kwargs.get("input_file")
     output_file = kwargs.get("output_file")
     closed_column = kwargs.get("closed_column")
@@ -55,7 +54,7 @@ def parse_file(
                     df,
                     pd.DataFrame(
                         [[minDate.strftime(pattern), 0, summation]],
-                        columns=df.columns.values
+                        columns=df.columns.values,
                     ),
                 ]
             )
