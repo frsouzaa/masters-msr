@@ -1,7 +1,7 @@
 import json
 
 with open('results.json') as json_data:
-    d = json.loads(json_data)
+    d = json.load(json_data)
 
 all_languages = {}
 for repo in d["items"]:
