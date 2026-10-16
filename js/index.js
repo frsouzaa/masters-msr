@@ -32,6 +32,9 @@ const getWeeksBetween = (date1, date2) => {
 }
 
 const dumpVarIntoFile = (date, fileName) => {
+  if (!fs.existsSync(`../outputs`)){
+    fs.mkdirSync(`../outputs`);
+  }
   if (!fs.existsSync(`../outputs/${REPO_NAME}`)){
     fs.mkdirSync(`../outputs/${REPO_NAME}`);
   }
@@ -77,35 +80,25 @@ const queueStarsPerDay = (queue) => {
   queue.push(request);
 }
 
-const queueForksPerDay = (queue) => {
-  const forksPerDay = [];
+const queueForksPerDay = (queue, page = 1, cache = []) => {
   const request = new GitHubApiRequest(
-    `${GH_API_BASE_URL}/repos/${REPO_OWNER}/${REPO_NAME}`,
+    `${GH_API_BASE_URL}/repos/${REPO_OWNER}/${REPO_NAME}/forks?per_page=${FORKS_API_PER_PAGE}&page=${page}&sort=newest`,
     {},
     (result) => {
-      console.log(`Forks - Repository ${REPO_OWNER}/${REPO_NAME} found, fork count: ${result.data.forks_count}`);
-      const number_of_pages = Math.ceil(result.data.forks_count / FORKS_API_PER_PAGE);
-      for (let i = 1; i <= number_of_pages; i++) {
-        const request = new GitHubApiRequest(
-          `${GH_API_BASE_URL}/repos/${REPO_OWNER}/${REPO_NAME}/forks?per_page=${FORKS_API_PER_PAGE}&page=${i}&sort=newest`,
-          {},
-          (result) => {
-            console.log(`Forks - page ${i}`);
-            forksPerDay.push(...result.data.map(fork => ({
-              html_url: fork.html_url,
-              date: fork.created_at.split("T")[0],
-              count: 1,
-            })));
-            if (i === 1) {
-              dumpVarIntoFile(forksPerDay, "per_day_forks");
-              if (queue.getQueueLength() === 0) {
-                queue.stop();
-              }
-            }
-          }
-        );
-        queue.push(request);
+      console.log(`Forks - page ${page}`);
+      cache.push(...result.data.map(fork => ({
+        html_url: fork.html_url,
+        date: fork.created_at.split("T")[0],
+        count: 1,
+      })));
+      if (result.data.length < FORKS_API_PER_PAGE) {
+        dumpVarIntoFile(cache, "per_day_forks");
+        if (queue.getQueueLength() === 0) {
+          queue.stop();
+        }
+        return;
       }
+      queueForksPerDay(queue, page + 1, cache)
     }
   );
   queue.push(request);
@@ -255,7 +248,7 @@ const queueIssuesPerDay = (queue, page=1, after=null, cache=[]) => {
   queue.push(request);
 }
 
-let queue = new GitHubApiQueue([getApiClient()]);
+let queue = new GitHubApiQueue([getApiClient()], 10);
 
 queueStarsPerDay(queue);
 queueForksPerDay(queue);

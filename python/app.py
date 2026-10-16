@@ -154,4 +154,4 @@ spearman_file, pearson_file = correlation(MERGED_FILE, OUTPUT_DIR)
 
 merge_correlation_by_anderson_darling(spearman_file, pearson_file, ANDERSON_DARLING_FILE, CORRELATION_FINAL_FILE)
 
-plot_correlation_matrix(CORRELATION_FINAL_FILE, f"{OUTPUT_DIR}/plot_correlation_final.svg")
+plot_correlation_matrix(CORRELATION_FINAL_FILE, f"{OUTPUT_DIR}/plot_correlation_final_{REPO_NAME.replace("-", "_")}.svg")

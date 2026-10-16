@@ -18,6 +18,7 @@ poolingh -> ok
     Issues fechadas -> ok (rest API não suporta, tive que usar GraphQL)
     Número de autores que abrem Issues -> ok
     Número de autores que fecham Issues -> ok
+    Releases
 
 pytrends-modern
     google trends -> ok (olhar para keywords ou para topics?)
