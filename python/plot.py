@@ -140,6 +140,26 @@ def plot_correlation_matrix(input_file, output_file):
     plt.savefig(output_file, dpi=1000)
 
 
+def plot_merged_features(input_file, output_file):
+    df = pd.read_csv(input_file).set_index("date")
+
+    fig, ax = plt.subplots()
+
+    for feature in df.columns.values:
+        ax.plot(
+            df.index, df[feature], label=feature, linewidth=LINE_WIDTH
+        )
+    
+    pace = len(df.index.values) / 20
+    ax.set_xticks(df.index.values[0 :: max(1, int(pace))])
+    ax.legend()
+
+    fig.tight_layout()
+    fig.autofmt_xdate()
+    fig.set_size_inches(16, 12)
+    fig.savefig(output_file, dpi=1000)
+
+
 if __name__ == "__main__":
     # FEATURE = "pulls"
     # DATE_COLUMN = "created_at"
@@ -156,9 +176,14 @@ if __name__ == "__main__":
 
     # plot_ema(INPUT_FILE, OUTPUT_FILE, FEATURE.replace("_", " ").title(), NAME, date_column=DATE_COLUMN, main_column=MAIN_COLUMN)
 
-    REPO = "express"
+    # REPO = "express"
+    # OUTPUT_DIR = "outputs"
+    # INPUT_FILE = f"{OUTPUT_DIR}/{REPO}/correlation_final.csv"
+    # OUTPUT_FILE = f"{OUTPUT_DIR}/{REPO}/plot_correlation_final.svg"
+    # plot_correlation_matrix(INPUT_FILE, OUTPUT_FILE)
+    
+    REPO = "electron"
     OUTPUT_DIR = "outputs"
     INPUT_FILE = f"{OUTPUT_DIR}/{REPO}/merged_features.csv"
-    INPUT_FILE = f"{OUTPUT_DIR}/{REPO}/correlation_final.csv"
-    OUTPUT_FILE = f"{OUTPUT_DIR}/{REPO}/plot_correlation_final.svg"
-    plot_correlation_matrix(INPUT_FILE, OUTPUT_FILE)
+    OUTPUT_FILE = f"{OUTPUT_DIR}/{REPO}/plot_merged_features.svg"
+    plot_merged_features(INPUT_FILE, OUTPUT_FILE)

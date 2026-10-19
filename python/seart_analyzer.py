@@ -16,7 +16,7 @@ for repo in d["items"]:
         languages_repos[repo["mainLanguage"]].append(repo)
 
 for language, repos in languages_repos.items():
-    print(f"{language} repos found:", len(repos))
+    print(f"{language} repos found: {len(repos)} -> {len(repos)/len(d["items"])*100}%")
 
 for language, repos in languages_repos.items():
     most_starred_repos = sorted(repos, key=lambda item: item["stargazers"], reverse=True)[0:15]
