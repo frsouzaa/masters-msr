@@ -1,16 +1,16 @@
 import sys
-from commits import get_commits
-from trends import get_trends
-from parse import parse_file
-from ewma import ewma
-from plot import plot_ema, plot_correlation_matrix
-from merge import merge_features
-from statistic import (
+from src.commits import get_commits
+from src.trends import get_trends
+from src.parse import parse_file
+from src.ewma import ewma
+from src.plot import plot_ema, plot_correlation_matrix
+from src.merge import merge_features
+from src.statistic import (
     anderson_darling,
     correlation,
     merge_correlation_by_anderson_darling,
 )
-from pipeline import get_pipeline
+from src.pipeline import get_pipeline
 
 REPO_URL = sys.argv[-1]
 REPO_NAME = REPO_URL.strip("/").split("/")[-1]
