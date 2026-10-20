@@ -1,4 +1,4 @@
-from parse import pre_parse_pulls_closed
+from src.parse import pre_parse_pulls_closed
 
 
 def get_pipeline(output_dir):

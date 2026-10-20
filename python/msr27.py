@@ -1,17 +1,15 @@
 import os
 import pandas as pd
+from src.pipeline import get_pipeline
+from itertools import combinations
 
 INPUT_FOLDER = "outputs"
 
 directory = os.fsencode(INPUT_FOLDER)
 
-pairs = [
-    ("issues_created", "issues_created_by"),
-    ("issues_closed", "issues_closed_by"),
-    ("pulls_created", "pulls_created_by"),
-    ("pulls_closed", "pulls_closed_by"),
-    ("pulls_merged", "pulls_merged_by"),
-]
+features_pipeline = get_pipeline(INPUT_FOLDER)
+
+pairs = list(combinations([f["id"] for f in features_pipeline], 2))
 
 results = dict()
 
@@ -34,5 +32,6 @@ for file in os.listdir(directory):
     #     print(df.columns[indexes[0][i]], df.columns[indexes[1][i]])
 
 print()
-for k, v in results.items():
+results = sorted(results.items(), key=lambda item: item[1], reverse=True)
+for k, v in results:
     print(f"{k} - {v}")
