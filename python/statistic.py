@@ -70,8 +70,8 @@ def search_correlation(df):
 def merge_correlation_by_anderson_darling(
     spearman_file, pearson_file, anderson_darling_file, output_file
 ):
-    spearman = pd.read_csv(spearman_file)
-    pearson = pd.read_csv(pearson_file)
+    spearman = pd.read_csv(spearman_file, index_col=0)
+    pearson = pd.read_csv(pearson_file, index_col=0)
     anderson_darling = pd.read_csv(anderson_darling_file)
 
     normal_distributions = permutations(
@@ -81,11 +81,8 @@ def merge_correlation_by_anderson_darling(
         2,
     )
 
-    pearson_rows = spearman[spearman.columns[0]].values.tolist()
-
     for normal_distribution in normal_distributions:
-        row_index = pearson_rows.index(normal_distribution[1])
-        value = pearson[normal_distribution[0]][row_index]
-        spearman.loc[row_index, normal_distribution[0]] = value
+        value = pearson[normal_distribution[0]][normal_distribution[1]]
+        spearman.loc[normal_distribution[0], normal_distribution[1]] = value
 
-    spearman.to_csv(output_file, index=False)
+    spearman.to_csv(output_file)
