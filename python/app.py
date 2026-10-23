@@ -2,7 +2,7 @@ import sys
 from src.commits import get_commits
 from src.trends import get_trends
 from src.parse import parse_file
-from src.ewma import ewma
+from src.ewma import ewma, calculate_trend
 from src.plot import plot_ema, plot_correlation_matrix
 from src.merge import merge_features
 from src.statistic import (
@@ -73,3 +73,5 @@ plot_correlation_matrix(
     CORRELATION_FINAL_FILE,
     f"{OUTPUT_DIR}/plot_correlation_final_{REPO_NAME.replace("-", "_")}.svg",
 )
+
+calculate_trend(FEATURES_PIPELINE, f"{OUTPUT_DIR}/merged_ema.csv")

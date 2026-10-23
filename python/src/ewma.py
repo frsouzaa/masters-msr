@@ -4,17 +4,51 @@ import pandas as pd
 def ewma(input_file, output_file, main_column="count"):
     df = pd.read_csv(input_file)
 
-    df["ema6"] = df[main_column].ewm(span=6).mean()
-    df["ema12"] = df[main_column].ewm(span=12).mean()
-    df["ema24"] = df[main_column].ewm(span=24).mean()
-    df["ema48"] = df[main_column].ewm(span=48).mean()
+    df["short_ema"] = df[main_column].ewm(alpha=0.16).mean()
+    df["long_ema"] = df[main_column].ewm(alpha=0.08).mean()
 
     df.to_csv(output_file, index=False)
 
 
+def calculate_trend(features, output_file):
+    colunas = ["feature", "short_ema", "long_ema", "status"]
+    merged_df = pd.DataFrame(columns=colunas)
+
+    for feature in features:
+        try:
+            df = pd.read_csv(feature["emaFile"])
+            short_ema = df.iloc[-1]["short_ema"]
+            long_ema = df.iloc[-1]["long_ema"]
+            status = None
+            if short_ema == long_ema:
+                status = "stable"
+            if short_ema > long_ema:
+                status = "uptrend"
+            if short_ema < long_ema:
+                status = "downtrend"
+            merged_df = pd.concat(
+                [
+                    merged_df,
+                    pd.DataFrame(
+                        [[feature["id"], short_ema, long_ema, status]],
+                        columns=colunas,
+                    ),
+                ]
+            )
+        except Exception as e:
+            print(f"Error reading {feature["emaFile"]}: {e}")
+            continue
+
+    merged_df.to_csv(output_file, index=False)
+
+
 if __name__ == "__main__":
-    FEATURE = "pulls"
-    INPUT_FILE = f"outputs/{FEATURE}Final.csv"
-    OUTPUT_FILE = f"outputs/{FEATURE}EMA.csv"
-    MAIN_COLUMN = "count"
-    ewma(INPUT_FILE, OUTPUT_FILE, MAIN_COLUMN)
+    # FEATURE = "pulls"
+    # INPUT_FILE = f"outputs/final_{FEATURE}.csv"
+    # OUTPUT_FILE = f"outputs/ema_{FEATURE}.csv"
+    # MAIN_COLUMN = "count"
+    # ewma(INPUT_FILE, OUTPUT_FILE, MAIN_COLUMN)
+
+    from pipeline import get_pipeline
+
+    calculate_trend(get_pipeline("outputs/angular"), "outputs/angular/merged_ema.csv")

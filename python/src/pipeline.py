@@ -22,10 +22,6 @@ def get_pipeline(output_dir):
             "mode": "AGG",
         },
         {
-            "id": "forks",
-            "perDayFile": PER_DAY_FORKS_FILE,
-        },
-        {
             "id": "issues_created",
             "perDayFile": PER_DAY_ISSUES_FILE,
             "date": "created_at",
@@ -93,6 +89,10 @@ def get_pipeline(output_dir):
             "mode": "AGG",
         },
         {"id": "stars", "perDayFile": PER_DAY_STARS_FILE},
+        {
+            "id": "forks",
+            "perDayFile": PER_DAY_FORKS_FILE,
+        },
         {"id": "interest", "perDayFile": PER_DAY_INTEREST_FILE},
     ]
 
