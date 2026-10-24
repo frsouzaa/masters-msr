@@ -40,15 +40,3 @@ def calculate_trend(features, output_file):
             continue
 
     merged_df.to_csv(output_file, index=False)
-
-
-if __name__ == "__main__":
-    # FEATURE = "pulls"
-    # INPUT_FILE = f"outputs/final_{FEATURE}.csv"
-    # OUTPUT_FILE = f"outputs/ema_{FEATURE}.csv"
-    # MAIN_COLUMN = "count"
-    # ewma(INPUT_FILE, OUTPUT_FILE, MAIN_COLUMN)
-
-    from pipeline import get_pipeline
-
-    calculate_trend(get_pipeline("outputs/angular"), "outputs/angular/merged_ema.csv")

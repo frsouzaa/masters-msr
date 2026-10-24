@@ -17,8 +17,3 @@ def get_commits(output_file, repo_url):
     pd.DataFrame(commits, columns=["author_name", "author_email", "hash", "date", "count"]).to_csv(
         output_file, index=False
     )
-
-if __name__ == "__main__":
-    OUTPUT_FILE = "outputs/commitsPerDay.csv"
-    REPO_URL = "https://github.com/junit-team/junit4"
-    get_commits(OUTPUT_FILE, REPO_URL)

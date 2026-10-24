@@ -77,23 +77,3 @@ def parse_file(
     df.reset_index(drop=True, inplace=True)
 
     df.to_csv(output_file, index=False)
-
-
-if __name__ == "__main__":
-    FEATURE = "pulls"
-    DATE_COLUMN = "created_at"
-    MAIN_COLUMN = "count"
-    PERIOD = "MONTHLY"
-    MODE = "SUM"
-    OUTPUT_DIR = "outputs"
-    INPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}PerDay.csv"
-    OUTPUT_FILE = f"{OUTPUT_DIR}/{FEATURE}Final.csv"
-    parse_file(
-        INPUT_FILE,
-        OUTPUT_FILE,
-        DATE_COLUMN,
-        MAIN_COLUMN,
-        PERIOD,
-        MODE,
-        only_full_months=True,
-    )

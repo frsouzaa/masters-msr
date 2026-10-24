@@ -50,9 +50,6 @@ def plot_ema(
         )
         df.sort_index(inplace=True)
 
-    # plt.style.use(
-    # "https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitayasmoothie-dark.mplstyle"
-    # )
     fig, ax = plt.subplots()
 
     ax.plot(
@@ -97,7 +94,6 @@ def plot_ema(
     pace = len(df.index.values) / 20
     ax.set_xticks(df.index.values[0 :: max(1, int(pace))])
     ax.legend()
-    ax.set_title(f"{feature} for {name}{f" and {concat_name}" if concat_name else ""}")
 
     fig.autofmt_xdate()
     fig.set_size_inches(10, 6)
@@ -144,9 +140,6 @@ def msr_plot(
         )
         df.sort_index(inplace=True)
 
-    # plt.style.use(
-    # "https://github.com/dhaitz/matplotlib-stylesheets/raw/master/pitayasmoothie-dark.mplstyle"
-    # )
     fig, ax = plt.subplots()
 
     ax.plot(
@@ -200,6 +193,15 @@ def plot_correlation_matrix(input_file, output_file):
                 color="black" if abs(value) < 0.7 else "white",
             )
 
+    ticks = list(range(len(df.columns)))
+    ax.set_xticks(ticks)
+    ax.set_yticks(ticks)
+
+    ax.set_xticklabels(df.columns, rotation=30,
+    ha='left',
+    va='bottom')
+    ax.set_yticklabels(df.columns)
+
     fig.set_size_inches(10, 8)
 
     plt.savefig(output_file, dpi=1000, bbox_inches="tight", pad_inches=0)
@@ -220,40 +222,3 @@ def plot_merged_features(input_file, output_file):
     fig.autofmt_xdate()
     fig.set_size_inches(16, 12)
     fig.savefig(output_file, dpi=1000, bbox_inches="tight", pad_inches=0)
-
-
-if __name__ == "__main__":
-    FEATURE = "pulls"
-    DATE_COLUMN = "date"
-    MAIN_COLUMN = "count"
-    NAME = "created"
-    OUTPUT_DIR = "outputs"
-    INPUT_FILE = f"{OUTPUT_DIR}/vue/final_pulls_created.csv"
-
-    CONCAT_NAME = "authors"
-    CONCAT_FILE = f"{OUTPUT_DIR}/vue/final_pulls_created_by.csv"
-    OUTPUT_FILE = f"{OUTPUT_DIR}/vue.svg"
-    msr_plot(
-        INPUT_FILE,
-        OUTPUT_FILE,
-        FEATURE.replace("_", " ").title(),
-        NAME,
-        CONCAT_FILE,
-        CONCAT_NAME,
-        DATE_COLUMN,
-        MAIN_COLUMN,
-    )
-
-    # plot_ema(INPUT_FILE, OUTPUT_FILE, FEATURE.replace("_", " ").title(), NAME, date_column=DATE_COLUMN, main_column=MAIN_COLUMN)
-
-    # REPO = "express"
-    # OUTPUT_DIR = "outputs"
-    # INPUT_FILE = f"{OUTPUT_DIR}/{REPO}/correlation_final.csv"
-    # OUTPUT_FILE = f"{OUTPUT_DIR}/{REPO}/plot_correlation_final.svg"
-    # plot_correlation_matrix(INPUT_FILE, OUTPUT_FILE)
-
-    # REPO = "electron"
-    # OUTPUT_DIR = "outputs"
-    # INPUT_FILE = f"{OUTPUT_DIR}/{REPO}/merged_features.csv"
-    # OUTPUT_FILE = f"{OUTPUT_DIR}/{REPO}/plot_merged_features.svg"
-    # plot_merged_features(INPUT_FILE, OUTPUT_FILE)
